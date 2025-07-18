@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, ChevronDown, ChevronUp, CheckCircle, Clock, FileText, DollarSign, Calendar } from "lucide-react";
+import { ArrowLeft, Plus, ChevronDown, ChevronUp, CheckCircle, Clock, FileText, DollarSign, Calendar, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -102,11 +102,48 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
   };
 
   const markStepComplete = (stepId: number) => {
+    // Validation: Check if previous steps are completed before allowing current step completion
+    const canCompleteStep = validateStepCompletion(stepId);
+    
+    if (!canCompleteStep.isValid) {
+      alert(canCompleteStep.message);
+      return;
+    }
+
     setStepCompletionStatus(prev => ({
       ...prev,
       [stepId]: true
     }));
     alert(`Step ${stepId} has been marked as complete!`);
+  };
+
+  const validateStepCompletion = (stepId: number) => {
+    // Step 1 can always be completed
+    if (stepId === 1) {
+      return { isValid: true, message: "" };
+    }
+
+    // For steps 2-4, check if previous step is completed
+    const previousStepId = stepId - 1;
+    const isPreviousStepCompleted = stepCompletionStatus[previousStepId as keyof typeof stepCompletionStatus];
+
+    if (!isPreviousStepCompleted) {
+      return {
+        isValid: false,
+        message: `You must complete Step ${previousStepId} before proceeding to Step ${stepId}.`
+      };
+    }
+
+    return { isValid: true, message: "" };
+  };
+
+  const canAccessStep = (stepId: number) => {
+    // Step 1 is always accessible
+    if (stepId === 1) return true;
+    
+    // For other steps, check if previous step is completed
+    const previousStepId = stepId - 1;
+    return stepCompletionStatus[previousStepId as keyof typeof stepCompletionStatus];
   };
 
   const addNewRow = () => {
@@ -326,32 +363,50 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
         {/* Status Cards */}
         <div className="grid gap-4">
           <h2 className="text-xl font-semibold text-medical-dark">Case Status Steps</h2>
-          {statusSteps.map((step) => (
-            <Card key={step.id} className={`border ${step.completed ? 'border-medical-success bg-medical-success/5' : 'border-orange-300 bg-orange-50/30'}`}>
+          {statusSteps.map((step) => {
+            const isAccessible = canAccessStep(step.id);
+            const cardOpacity = isAccessible ? 'opacity-100' : 'opacity-50';
+            const cursorStyle = isAccessible ? 'cursor-pointer' : 'cursor-not-allowed';
+            
+            return (
+            <Card key={step.id} className={`border ${step.completed ? 'border-medical-success bg-medical-success/5' : 'border-orange-300 bg-orange-50/30'} ${cardOpacity} transition-opacity`}>
               <Collapsible
                 open={expandedSteps.includes(step.id)}
-                onOpenChange={() => toggleStepExpansion(step.id)}
+                onOpenChange={() => isAccessible && toggleStepExpansion(step.id)}
+                disabled={!isAccessible}
               >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-medical-background/30 transition-colors">
+                <CollapsibleTrigger asChild disabled={!isAccessible}>
+                  <CardHeader className={`${isAccessible ? 'hover:bg-medical-background/30' : ''} transition-colors ${cursorStyle}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          step.completed ? 'bg-medical-success text-white' : 'bg-orange-400 text-white'
+                          step.completed ? 'bg-medical-success text-white' : 
+                          isAccessible ? 'bg-orange-400 text-white' : 'bg-gray-400 text-white'
                         }`}>
                           {step.completed ? (
                             <CheckCircle className="h-4 w-4" />
-                          ) : (
+                          ) : isAccessible ? (
                             <Clock className="h-4 w-4" />
+                          ) : (
+                            <Lock className="h-4 w-4" />
                           )}
                         </div>
-                        <CardTitle className={`text-lg ${step.completed ? 'text-medical-success' : 'text-orange-600'}`}>
+                        <CardTitle className={`text-lg ${
+                          step.completed ? 'text-medical-success' : 
+                          isAccessible ? 'text-orange-600' : 'text-gray-500'
+                        }`}>
                           Step {step.id}: {step.title}
+                          {!isAccessible && step.id > 1 && (
+                            <span className="text-xs text-gray-400 ml-2">
+                              (Complete Step {step.id - 1} first)
+                            </span>
+                          )}
                         </CardTitle>
                         <Badge variant={step.completed ? "default" : "secondary"} className={
-                          step.completed ? "bg-medical-success text-white" : "bg-orange-400 text-white"
+                          step.completed ? "bg-medical-success text-white" : 
+                          isAccessible ? "bg-orange-400 text-white" : "bg-gray-400 text-white"
                         }>
-                          {step.completed ? "Completed" : "Pending"}
+                          {step.completed ? "Completed" : isAccessible ? "Pending" : "Locked"}
                         </Badge>
                       </div>
                       {expandedSteps.includes(step.id) ? (
@@ -417,7 +472,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                 </CollapsibleContent>
               </Collapsible>
             </Card>
-          ))}
+            );
+          })}
         </div>
       </div>
     </Layout>
