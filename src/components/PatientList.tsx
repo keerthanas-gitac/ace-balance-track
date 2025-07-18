@@ -9,9 +9,9 @@ import {
   Upload, 
   FileText, 
   Calendar,
-  DollarSign,
   Eye,
-  ArrowLeft
+  ArrowLeft,
+  Users
 } from "lucide-react";
 
 interface Patient {
@@ -21,7 +21,6 @@ interface Patient {
   gender: string;
   caseNumber: string;
   registrationDate: string;
-  totalBalance: number;
   status: 'active' | 'pending' | 'completed';
   providersCount: number;
 }
@@ -42,7 +41,6 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
       gender: "Male",
       caseNumber: "ACE-2024-001",
       registrationDate: "2024-01-15",
-      totalBalance: 15650.00,
       status: "active",
       providersCount: 3
     },
@@ -53,7 +51,6 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
       gender: "Female",
       caseNumber: "ACE-2024-002",
       registrationDate: "2024-01-18",
-      totalBalance: 8920.50,
       status: "pending",
       providersCount: 2
     },
@@ -64,7 +61,6 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
       gender: "Male", 
       caseNumber: "ACE-2024-003",
       registrationDate: "2024-01-20",
-      totalBalance: 22100.75,
       status: "active",
       providersCount: 4
     },
@@ -75,7 +71,6 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
       gender: "Female",
       caseNumber: "ACE-2024-004", 
       registrationDate: "2024-01-22",
-      totalBalance: 0,
       status: "completed",
       providersCount: 2
     }
@@ -170,16 +165,11 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
                   <span className="font-medium">{new Date(patient.registrationDate).toLocaleDateString()}</span>
                 </div>
 
-                {/* Balance Info */}
+                {/* Provider Info */}
                 <div className="bg-accent/30 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <DollarSign className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">Total Balance</span>
-                    </div>
-                    <span className={`font-bold ${patient.totalBalance > 0 ? 'text-primary' : 'text-medical-success'}`}>
-                      ${patient.totalBalance.toLocaleString()}
-                    </span>
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Providers</span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
                     {patient.providersCount} provider{patient.providersCount !== 1 ? 's' : ''}
@@ -239,12 +229,6 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
                   {patients.filter(p => p.status === 'completed').length}
                 </div>
                 <div className="text-sm text-muted-foreground">Completed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  ${patients.reduce((sum, p) => sum + p.totalBalance, 0).toLocaleString()}
-                </div>
-                <div className="text-sm text-muted-foreground">Total Balance</div>
               </div>
             </div>
           </CardContent>
