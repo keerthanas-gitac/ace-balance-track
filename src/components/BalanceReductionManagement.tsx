@@ -96,8 +96,10 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
   };
 
   const markStepComplete = (stepId: number) => {
-    if (stepId === currentStep) {
-      setCurrentStep(stepId + 1);
+    // stepId is 1-4 for the 4 status steps
+    // currentStep should be stepId + 1 to allow marking that step complete
+    if (currentStep === stepId + 1) {
+      setCurrentStep(stepId + 2); // Move to next step
       alert(`Step ${stepId} marked as complete!`);
     }
   };
@@ -399,7 +401,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                     {currentStep === step.id + 1 && !step.completed && (
                       <div className="mt-4">
                         <Button
-                          onClick={() => markStepComplete(step.id + 1)}
+                          onClick={() => markStepComplete(step.id)}
                           className="bg-medical-success hover:bg-medical-success/90 text-white"
                         >
                           Mark Step {step.id} as Complete
