@@ -4,7 +4,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { PatientList } from "@/components/PatientList";
 import { PatientDetailedInfo } from "@/components/PatientDetailedInfo";
 import { BalanceReductionManagement } from "@/components/BalanceReductionManagement";
-import { ProviderFollowUp } from "@/components/ProviderFollowUp";
+import { Reports } from "@/components/Reports";
 import { CSVUpload } from "@/components/CSVUpload";
 
 const Index = () => {
@@ -41,8 +41,8 @@ const Index = () => {
       return <BalanceReductionManagement onNavigate={handleNavigate} appointmentId={selectedAppointmentId} />;
     case "import":
       return <CSVUpload onNavigate={handleNavigate} />;
-    case "providers":
-      return <ProviderFollowUp onNavigate={handleNavigate} />;
+    case "reports":
+      return <Reports onNavigate={handleNavigate} />;
     default:
       return <Dashboard onNavigate={handleNavigate} />;
   }
