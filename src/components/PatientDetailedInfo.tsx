@@ -107,6 +107,13 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
     return `${completedSteps}/4 Steps Complete`;
   };
 
+  // Function to calculate final balance after reductions
+  const calculateFinalBalance = (originalBalance: number, progress: CaseProgress) => {
+    const completedSteps = Object.values(progress.stepCompletionStatus).filter(Boolean).length;
+    // Reduce by 10% per completed step
+    return originalBalance * (1 - (completedSteps * 0.1));
+  };
+
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([
     "medical_records_2024.pdf",
     "insurance_claim_form.pdf"
@@ -231,6 +238,7 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
                   <TableHead className="text-medical-dark font-semibold">Service Provider Name</TableHead>
                   <TableHead className="text-medical-dark font-semibold">Treatment Details</TableHead>
                   <TableHead className="text-medical-dark font-semibold">Current Balance</TableHead>
+                  <TableHead className="text-medical-dark font-semibold">Final Balance</TableHead>
                   <TableHead className="text-medical-dark font-semibold">Status</TableHead>
                   <TableHead className="text-medical-dark font-semibold">Case Progress</TableHead>
                   <TableHead className="text-medical-dark font-semibold text-center">Actions</TableHead>
@@ -247,6 +255,16 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
                     </TableCell>
                     <TableCell className="font-semibold text-medical-dark">
                       ${appointment.currentBalance.toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-semibold text-medical-primary">
+                        ${calculateFinalBalance(appointment.currentBalance, appointment.caseProgress).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </div>
+                      {Object.values(appointment.caseProgress.stepCompletionStatus).filter(Boolean).length > 0 && (
+                        <div className="text-xs text-medical-muted mt-1">
+                          {(((appointment.currentBalance - calculateFinalBalance(appointment.currentBalance, appointment.caseProgress)) / appointment.currentBalance) * 100).toFixed(1)}% reduction
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(appointment.status)}>
