@@ -18,7 +18,8 @@ import {
   Download,
   Trash2,
   Eye,
-  RefreshCw
+  RefreshCw,
+  ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -242,10 +243,22 @@ export const CSVUpload = ({ onNavigate }: CSVUploadProps) => {
   };
 
   return (
-    <Layout onNavigate={onNavigate}>
+    <Layout title="CSV Import" onNavigate={onNavigate}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-medical-dark">CSV Data Import</h1>
+        {/* Header with Back Button */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigate("dashboard")}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-medical-dark">CSV Data Import</h1>
+          </div>
           <Badge variant="secondary" className="text-sm">
             {uploadHistory.length} Total Uploads
           </Badge>

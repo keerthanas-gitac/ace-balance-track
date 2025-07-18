@@ -131,7 +131,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
   };
 
   return (
-    <Layout onNavigate={onNavigate}>
+    <Layout title="Balance Reduction Management" onNavigate={onNavigate}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">

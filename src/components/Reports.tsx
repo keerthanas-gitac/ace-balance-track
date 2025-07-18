@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Layout } from "./Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,30 +104,26 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onNavigate("dashboard")}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Provider Follow-up Reports</h1>
-              <p className="text-sm text-muted-foreground">
-                View and download provider pending follow-up reports organized by patients and status
-              </p>
-            </div>
+    <Layout title="Provider Follow-up Reports" onNavigate={onNavigate}>
+      <div className="space-y-6">
+        {/* Header with Back Button */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigate("dashboard")}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-foreground">Provider Follow-up Reports</h1>
+            <p className="text-sm text-muted-foreground">
+              View and download provider pending follow-up reports organized by patients and status
+            </p>
           </div>
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
@@ -334,6 +331,6 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };

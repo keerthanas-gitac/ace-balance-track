@@ -91,7 +91,7 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
   };
 
   return (
-    <Layout title="Patient Management">
+    <Layout title="Patient Management" onNavigate={onNavigate}>
       <div className="space-y-6 animate-fade-in">
         {/* Header Actions */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

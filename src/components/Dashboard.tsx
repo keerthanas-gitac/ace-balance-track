@@ -59,7 +59,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
   ];
 
   return (
-    <Layout title="Dashboard">
+    <Layout title="Dashboard" onNavigate={onNavigate} showHomeButton={false}>
       <div className="space-y-8 animate-fade-in">
         {/* Welcome Section */}
         <div className="bg-gradient-primary rounded-lg p-8 text-primary-foreground">

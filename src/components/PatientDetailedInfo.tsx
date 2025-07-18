@@ -67,7 +67,7 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
   };
 
   return (
-    <Layout onNavigate={onNavigate}>
+    <Layout title="Patient Details" onNavigate={onNavigate}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
