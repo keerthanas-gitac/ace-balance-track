@@ -234,10 +234,6 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                 <h2 className="text-xl font-semibold text-foreground">
                   Available Reports ({filteredReports.length})
                 </h2>
-                <Button className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Bulk Download
-                </Button>
               </div>
 
               <div className="grid gap-4">
@@ -258,19 +254,7 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                              {report.description}
                            </CardDescription>
                          </div>
-                         <div className="flex gap-2">
-                           <Badge variant={report.type === "patient-wise" ? "default" : "secondary"}>
-                             {report.type === "patient-wise" ? "Patient Wise" : "Status Wise"}
-                           </Badge>
-                           <Badge variant={report.status === "overdue" ? "destructive" : "outline"}>
-                             {report.status === "overdue" ? (
-                               <><AlertTriangle className="h-3 w-3 mr-1" />Overdue</>
-                             ) : (
-                               <><Clock className="h-3 w-3 mr-1" />Pending</>
-                             )}
-                           </Badge>
-                         </div>
-                       </div>
+                        </div>
                      </CardHeader>
                      <CardContent>
                        <div className="flex justify-between items-center">
