@@ -100,7 +100,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
     // currentStep should be stepId + 1 to allow marking that step complete
     if (currentStep === stepId + 1) {
       setCurrentStep(stepId + 2); // Move to next step
-      alert(`Step ${stepId} marked as complete!`);
+      console.log(`Step ${stepId} marked complete. Current step now: ${stepId + 2}`);
+      alert(`Step ${stepId} marked as complete! Moving to next step.`);
     }
   };
 
