@@ -14,9 +14,12 @@ import {
   FileSpreadsheet, 
   Calendar as CalendarIcon,
   Users, 
-  Building,
+  BarChart3,
   Filter,
-  ArrowLeft
+  ArrowLeft,
+  Eye,
+  Clock,
+  AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -28,35 +31,43 @@ interface ReportsProps {
 const mockReports = [
   {
     id: "1",
-    name: "Provider Performance Report",
-    description: "Comprehensive analysis of provider performance metrics",
-    type: "provider",
+    name: "Provider Pending Follow-up Report - Patient Wise",
+    description: "Detailed pending follow-ups organized by individual patients",
+    type: "patient-wise",
     lastGenerated: "2024-01-15",
-    records: 245
+    records: 89,
+    status: "pending",
+    pendingCount: 89
   },
   {
-    id: "2",
-    name: "Attorney Case Summary",
-    description: "Summary of cases handled by attorney firms",
-    type: "attorney",
+    id: "2", 
+    name: "Provider Pending Follow-up Report - Status Wise",
+    description: "Pending follow-ups grouped by current status categories",
+    type: "status-wise",
     lastGenerated: "2024-01-14",
-    records: 89
+    records: 156,
+    status: "pending",
+    pendingCount: 67
   },
   {
     id: "3",
-    name: "Monthly Provider Revenue",
-    description: "Revenue breakdown by healthcare providers",
-    type: "provider",
+    name: "Provider Pending Follow-up Report - Overdue Items",
+    description: "Critical overdue follow-ups requiring immediate attention",
+    type: "patient-wise",
     lastGenerated: "2024-01-13",
-    records: 156
+    records: 23,
+    status: "overdue",
+    pendingCount: 23
   },
   {
     id: "4",
-    name: "Attorney Settlement Analysis",
-    description: "Analysis of settlements by attorney representation",
-    type: "attorney",
+    name: "Provider Pending Follow-up Report - Weekly Summary",
+    description: "Weekly summary of all pending provider follow-ups",
+    type: "status-wise",
     lastGenerated: "2024-01-12",
-    records: 73
+    records: 134,
+    status: "pending",
+    pendingCount: 98
   }
 ];
 
@@ -66,6 +77,7 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
   const [dateTo, setDateTo] = useState<Date>();
   const [searchTerm, setSearchTerm] = useState("");
   const [generatingReport, setGeneratingReport] = useState<string | null>(null);
+  const [viewingReport, setViewingReport] = useState<string | null>(null);
 
   const filteredReports = mockReports.filter(report => {
     const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,6 +96,12 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
     console.log(`Generating ${format} report for ${reportId}`);
   };
 
+  const handleViewReport = (reportId: string) => {
+    setViewingReport(reportId);
+    // In real implementation, this would open a detailed view modal or navigate to report details
+    console.log(`Viewing report ${reportId}`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b bg-card">
@@ -99,9 +117,9 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
               Back to Dashboard
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Reports</h1>
+              <h1 className="text-2xl font-bold text-foreground">Provider Follow-up Reports</h1>
               <p className="text-sm text-muted-foreground">
-                Generate and download reports grouped by provider or attorney
+                View and download provider pending follow-up reports organized by patients and status
               </p>
             </div>
           </div>
@@ -132,15 +150,15 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                 </div>
 
                 <div>
-                  <Label htmlFor="group">Group By</Label>
+                  <Label htmlFor="group">Report Type</Label>
                   <Select value={selectedGroup} onValueChange={setSelectedGroup}>
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select grouping" />
+                      <SelectValue placeholder="Select report type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Reports</SelectItem>
-                      <SelectItem value="provider">Provider Reports</SelectItem>
-                      <SelectItem value="attorney">Attorney Reports</SelectItem>
+                      <SelectItem value="patient-wise">Patient Wise</SelectItem>
+                      <SelectItem value="status-wise">Status Wise</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -228,57 +246,75 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
               <div className="grid gap-4">
                 {filteredReports.map((report) => (
                   <Card key={report.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <CardTitle className="flex items-center gap-2 text-lg">
-                            {report.type === "provider" ? (
-                              <Users className="h-5 w-5 text-primary" />
-                            ) : (
-                              <Building className="h-5 w-5 text-primary" />
-                            )}
-                            {report.name}
-                          </CardTitle>
-                          <CardDescription className="mt-1">
-                            {report.description}
-                          </CardDescription>
-                        </div>
-                        <Badge variant={report.type === "provider" ? "default" : "secondary"}>
-                          {report.type === "provider" ? "Provider" : "Attorney"}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center">
-                        <div className="text-sm text-muted-foreground">
-                          <p>Last Generated: {format(new Date(report.lastGenerated), "PPP")}</p>
-                          <p>{report.records} records</p>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleGenerateReport(report.id, "excel")}
-                            disabled={generatingReport === report.id}
-                            className="gap-2"
-                          >
-                            <FileSpreadsheet className="h-4 w-4" />
-                            {generatingReport === report.id ? "Generating..." : "Excel"}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleGenerateReport(report.id, "pdf")}
-                            disabled={generatingReport === report.id}
-                            className="gap-2"
-                          >
-                            <FileText className="h-4 w-4" />
-                            {generatingReport === report.id ? "Generating..." : "PDF"}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
+                     <CardHeader>
+                       <div className="flex justify-between items-start">
+                         <div className="flex-1">
+                           <CardTitle className="flex items-center gap-2 text-lg">
+                             {report.type === "patient-wise" ? (
+                               <Users className="h-5 w-5 text-primary" />
+                             ) : (
+                               <BarChart3 className="h-5 w-5 text-primary" />
+                             )}
+                             {report.name}
+                           </CardTitle>
+                           <CardDescription className="mt-1">
+                             {report.description}
+                           </CardDescription>
+                         </div>
+                         <div className="flex gap-2">
+                           <Badge variant={report.type === "patient-wise" ? "default" : "secondary"}>
+                             {report.type === "patient-wise" ? "Patient Wise" : "Status Wise"}
+                           </Badge>
+                           <Badge variant={report.status === "overdue" ? "destructive" : "outline"}>
+                             {report.status === "overdue" ? (
+                               <><AlertTriangle className="h-3 w-3 mr-1" />Overdue</>
+                             ) : (
+                               <><Clock className="h-3 w-3 mr-1" />Pending</>
+                             )}
+                           </Badge>
+                         </div>
+                       </div>
+                     </CardHeader>
+                     <CardContent>
+                       <div className="flex justify-between items-center">
+                         <div className="text-sm text-muted-foreground">
+                           <p>Last Generated: {format(new Date(report.lastGenerated), "PPP")}</p>
+                           <p>{report.records} total records • {report.pendingCount} pending</p>
+                         </div>
+                         
+                         <div className="flex gap-2">
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => handleViewReport(report.id)}
+                             className="gap-2"
+                           >
+                             <Eye className="h-4 w-4" />
+                             View
+                           </Button>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => handleGenerateReport(report.id, "excel")}
+                             disabled={generatingReport === report.id}
+                             className="gap-2"
+                           >
+                             <FileSpreadsheet className="h-4 w-4" />
+                             {generatingReport === report.id ? "Generating..." : "Excel"}
+                           </Button>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => handleGenerateReport(report.id, "pdf")}
+                             disabled={generatingReport === report.id}
+                             className="gap-2"
+                           >
+                             <FileText className="h-4 w-4" />
+                             {generatingReport === report.id ? "Generating..." : "PDF"}
+                           </Button>
+                         </div>
+                       </div>
+                     </CardContent>
                   </Card>
                 ))}
               </div>
