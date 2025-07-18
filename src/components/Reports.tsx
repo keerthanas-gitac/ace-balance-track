@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { 
@@ -98,9 +99,30 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
   };
 
   const handleViewReport = (reportId: string) => {
-    setViewingReport(reportId);
-    // In real implementation, this would open a detailed view modal or navigate to report details
-    console.log(`Viewing report ${reportId}`);
+    setViewingReport(viewingReport === reportId ? null : reportId);
+  };
+
+  const getReportDetails = (reportId: string) => {
+    const report = mockReports.find(r => r.id === reportId);
+    if (!report) return null;
+
+    // Mock detailed data for the report
+    const mockDetailedData = {
+      summary: {
+        totalPatients: report.records,
+        pendingFollowups: report.pendingCount,
+        overdueItems: report.status === "overdue" ? report.pendingCount : Math.floor(report.pendingCount * 0.15),
+        avgResponseTime: "3.2 days"
+      },
+      recentEntries: [
+        { patient: "John Smith", provider: "Dr. Johnson", status: "Pending", daysOld: 5, amount: "$1,250" },
+        { patient: "Sarah Wilson", provider: "Dr. Martinez", status: "Overdue", daysOld: 12, amount: "$890" },
+        { patient: "Mike Davis", provider: "Dr. Thompson", status: "Pending", daysOld: 3, amount: "$2,100" },
+        { patient: "Lisa Brown", provider: "Dr. Anderson", status: "Pending", daysOld: 7, amount: "$1,450" }
+      ]
+    };
+
+    return { report, details: mockDetailedData };
   };
 
   return (
@@ -237,67 +259,123 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
               </div>
 
               <div className="grid gap-4">
-                {filteredReports.map((report) => (
-                  <Card key={report.id} className="hover:shadow-md transition-shadow">
-                     <CardHeader>
-                       <div className="flex justify-between items-start">
-                         <div className="flex-1">
-                           <CardTitle className="flex items-center gap-2 text-lg">
-                             {report.type === "patient-wise" ? (
-                               <Users className="h-5 w-5 text-primary" />
-                             ) : (
-                               <BarChart3 className="h-5 w-5 text-primary" />
-                             )}
-                             {report.name}
-                           </CardTitle>
-                           <CardDescription className="mt-1">
-                             {report.description}
-                           </CardDescription>
-                         </div>
-                        </div>
-                     </CardHeader>
-                     <CardContent>
-                       <div className="flex justify-between items-center">
-                         <div className="text-sm text-muted-foreground">
-                           <p>Last Generated: {format(new Date(report.lastGenerated), "PPP")}</p>
-                           <p>{report.records} total records • {report.pendingCount} pending</p>
+                {filteredReports.map((report) => {
+                  const reportDetails = getReportDetails(report.id);
+                  const isViewing = viewingReport === report.id;
+                  
+                  return (
+                    <Card key={report.id} className="hover:shadow-md transition-shadow">
+                       <CardHeader>
+                         <div className="flex justify-between items-start">
+                           <div className="flex-1">
+                             <CardTitle className="flex items-center gap-2 text-lg">
+                               {report.type === "patient-wise" ? (
+                                 <Users className="h-5 w-5 text-primary" />
+                               ) : (
+                                 <BarChart3 className="h-5 w-5 text-primary" />
+                               )}
+                               {report.name}
+                             </CardTitle>
+                             <CardDescription className="mt-1">
+                               {report.description}
+                             </CardDescription>
+                           </div>
+                          </div>
+                       </CardHeader>
+                       <CardContent>
+                         <div className="flex justify-between items-center">
+                           <div className="text-sm text-muted-foreground">
+                             <p>Last Generated: {format(new Date(report.lastGenerated), "PPP")}</p>
+                             <p>{report.records} total records • {report.pendingCount} pending</p>
+                           </div>
+                           
+                           <div className="flex gap-2">
+                             <Button
+                               variant={isViewing ? "default" : "outline"}
+                               size="sm"
+                               onClick={() => handleViewReport(report.id)}
+                               className="gap-2"
+                             >
+                               <Eye className="h-4 w-4" />
+                               {isViewing ? "Hide" : "View"}
+                             </Button>
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => handleGenerateReport(report.id, "excel")}
+                               disabled={generatingReport === report.id}
+                               className="gap-2"
+                             >
+                               <FileSpreadsheet className="h-4 w-4" />
+                               {generatingReport === report.id ? "Generating..." : "Excel"}
+                             </Button>
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => handleGenerateReport(report.id, "pdf")}
+                               disabled={generatingReport === report.id}
+                               className="gap-2"
+                             >
+                               <FileText className="h-4 w-4" />
+                               {generatingReport === report.id ? "Generating..." : "PDF"}
+                             </Button>
+                           </div>
                          </div>
                          
-                         <div className="flex gap-2">
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             onClick={() => handleViewReport(report.id)}
-                             className="gap-2"
-                           >
-                             <Eye className="h-4 w-4" />
-                             View
-                           </Button>
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             onClick={() => handleGenerateReport(report.id, "excel")}
-                             disabled={generatingReport === report.id}
-                             className="gap-2"
-                           >
-                             <FileSpreadsheet className="h-4 w-4" />
-                             {generatingReport === report.id ? "Generating..." : "Excel"}
-                           </Button>
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             onClick={() => handleGenerateReport(report.id, "pdf")}
-                             disabled={generatingReport === report.id}
-                             className="gap-2"
-                           >
-                             <FileText className="h-4 w-4" />
-                             {generatingReport === report.id ? "Generating..." : "PDF"}
-                           </Button>
-                         </div>
-                       </div>
-                     </CardContent>
-                  </Card>
-                ))}
+                         {/* Expanded view section */}
+                         {isViewing && reportDetails && (
+                           <div className="mt-4 pt-4 border-t border-border">
+                             <div className="space-y-4">
+                               {/* Summary Stats */}
+                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                 <div className="bg-accent/30 rounded-lg p-3">
+                                   <div className="text-2xl font-bold text-primary">{reportDetails.details.summary.totalPatients}</div>
+                                   <div className="text-xs text-muted-foreground">Total Patients</div>
+                                 </div>
+                                 <div className="bg-accent/30 rounded-lg p-3">
+                                   <div className="text-2xl font-bold text-orange-600">{reportDetails.details.summary.pendingFollowups}</div>
+                                   <div className="text-xs text-muted-foreground">Pending Follow-ups</div>
+                                 </div>
+                                 <div className="bg-accent/30 rounded-lg p-3">
+                                   <div className="text-2xl font-bold text-destructive">{reportDetails.details.summary.overdueItems}</div>
+                                   <div className="text-xs text-muted-foreground">Overdue Items</div>
+                                 </div>
+                                 <div className="bg-accent/30 rounded-lg p-3">
+                                   <div className="text-2xl font-bold text-primary">{reportDetails.details.summary.avgResponseTime}</div>
+                                   <div className="text-xs text-muted-foreground">Avg Response</div>
+                                 </div>
+                               </div>
+                               
+                               {/* Recent Entries */}
+                               <div>
+                                 <h4 className="font-semibold text-foreground mb-3">Recent Entries Preview</h4>
+                                 <div className="space-y-2">
+                                   {reportDetails.details.recentEntries.map((entry, index) => (
+                                     <div key={index} className="flex justify-between items-center p-3 bg-background rounded-lg border border-border">
+                                       <div className="flex-1">
+                                         <div className="font-medium text-foreground">{entry.patient}</div>
+                                         <div className="text-sm text-muted-foreground">{entry.provider}</div>
+                                       </div>
+                                       <div className="text-center">
+                                         <Badge variant={entry.status === "Overdue" ? "destructive" : "outline"}>
+                                           {entry.status}
+                                         </Badge>
+                                         <div className="text-xs text-muted-foreground mt-1">{entry.daysOld} days</div>
+                                       </div>
+                                       <div className="text-right">
+                                         <div className="font-medium text-foreground">{entry.amount}</div>
+                                       </div>
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                         )}
+                       </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
 
               {filteredReports.length === 0 && (
