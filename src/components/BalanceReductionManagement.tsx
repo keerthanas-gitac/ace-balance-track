@@ -287,18 +287,24 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                 </span>
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Close Case Button */}
-            <div className="mt-6 flex justify-center">
-              <Button
-                onClick={handleCloseCase}
-                size="lg"
-                className="bg-medical-danger hover:bg-medical-danger/90 text-white px-8 py-3"
-                disabled={currentStep >= 5}
-              >
-                {currentStep >= 5 ? "Case Closed" : "Close the Case"}
-              </Button>
-            </div>
+        {/* Close Case Button - Moved outside of card for better visibility */}
+        <div className="flex justify-center">
+          <Button
+            onClick={handleCloseCase}
+            size="lg"
+            className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 font-semibold shadow-lg"
+            disabled={currentStep >= 5}
+          >
+            {currentStep >= 5 ? "Case Closed" : "Close the Case"}
+          </Button>
+        </div>
+
+        {/* Reopening card structure for status cards */}
+        <Card className="border-0 shadow-none bg-transparent">
+          <CardContent className="p-0">
           </CardContent>
         </Card>
 
