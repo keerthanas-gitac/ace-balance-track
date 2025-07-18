@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, ChevronDown, ChevronUp, CheckCircle, Clock, FileText, DollarSign, Calendar, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,12 @@ interface BalanceReductionManagementProps {
   appointmentId: string;
 }
 
+interface CaseProgress {
+  currentStep: number;
+  stepCompletionStatus: { [key: number]: boolean };
+  totalBillValue: number;
+}
+
 export const BalanceReductionManagement = ({ onNavigate, appointmentId }: BalanceReductionManagementProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [reductionAmount, setReductionAmount] = useState(0);
@@ -24,6 +30,33 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
     3: false,
     4: false
   });
+
+  // Load progress from localStorage on component mount
+  useEffect(() => {
+    const savedProgress = localStorage.getItem('appointmentProgress');
+    if (savedProgress) {
+      const progressData = JSON.parse(savedProgress);
+      const appointmentData = progressData[appointmentId];
+      if (appointmentData?.caseProgress) {
+        setCurrentStep(appointmentData.caseProgress.currentStep);
+        setStepCompletionStatus(appointmentData.caseProgress.stepCompletionStatus);
+      }
+    }
+  }, [appointmentId]);
+
+  // Save progress to localStorage whenever state changes
+  const saveProgressToLocalStorage = (progress: CaseProgress, updatedBalance?: number, newStatus?: string) => {
+    const savedProgress = localStorage.getItem('appointmentProgress');
+    const progressData = savedProgress ? JSON.parse(savedProgress) : {};
+    
+    progressData[appointmentId] = {
+      caseProgress: progress,
+      currentBalance: updatedBalance,
+      status: newStatus
+    };
+    
+    localStorage.setItem('appointmentProgress', JSON.stringify(progressData));
+  };
   const [appointmentHistory, setAppointmentHistory] = useState([
     {
       id: "1",
@@ -97,7 +130,16 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
   };
 
   const handleCloseCase = () => {
-    setCurrentStep(2); // Move to step 1 (Closed Records Sent)
+    const newCurrentStep = 2;
+    setCurrentStep(newCurrentStep);
+    
+    // Save progress to localStorage
+    saveProgressToLocalStorage({
+      currentStep: newCurrentStep,
+      stepCompletionStatus,
+      totalBillValue
+    });
+    
     alert("Case has been closed and moved to Step 1!");
   };
 
@@ -110,10 +152,38 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
       return;
     }
 
-    setStepCompletionStatus(prev => ({
-      ...prev,
+    const newStepCompletionStatus = {
+      ...stepCompletionStatus,
       [stepId]: true
-    }));
+    };
+
+    setStepCompletionStatus(newStepCompletionStatus);
+    
+    // Update current step to next step if this wasn't the last step
+    const newCurrentStep = stepId < 4 ? stepId + 1 : currentStep;
+    if (newCurrentStep !== currentStep) {
+      setCurrentStep(newCurrentStep);
+    }
+
+    // Calculate new balance (reduce by 10% per completed step for demo)
+    const completedSteps = Object.values(newStepCompletionStatus).filter(Boolean).length;
+    const newBalance = totalBillValue * (1 - (completedSteps * 0.1));
+    
+    // Determine new status based on completion
+    let newStatus = "Active";
+    if (completedSteps === 4) {
+      newStatus = "Completed";
+    } else if (completedSteps > 0) {
+      newStatus = "In Progress";
+    }
+
+    // Save progress to localStorage
+    saveProgressToLocalStorage({
+      currentStep: newCurrentStep,
+      stepCompletionStatus: newStepCompletionStatus,
+      totalBillValue: totalBillValue
+    }, newBalance, newStatus);
+
     alert(`Step ${stepId} has been marked as complete!`);
   };
 

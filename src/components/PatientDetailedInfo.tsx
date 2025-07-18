@@ -1,14 +1,30 @@
-import { useState } from "react";
-import { ArrowLeft, Upload, FileText, Edit, Eye, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Upload, FileText, Edit, Eye, Trash2, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Layout } from "@/components/Layout";
 
 interface PatientDetailedInfoProps {
   onNavigate: (page: string, appointmentId?: string) => void;
   patientId: string;
+}
+
+interface CaseProgress {
+  currentStep: number;
+  stepCompletionStatus: { [key: number]: boolean };
+  totalBillValue: number;
+}
+
+interface Appointment {
+  id: string;
+  serviceProvider: string;
+  treatmentDetails: string;
+  currentBalance: number;
+  status: string;
+  caseProgress: CaseProgress;
 }
 
 export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedInfoProps) => {
@@ -21,30 +37,75 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
     caseNumber: "ACE-2024-001"
   };
 
-  // Mock appointments data
-  const appointments = [
+  // Mock appointments data with progress tracking
+  const [appointments, setAppointments] = useState([
     {
       id: "1",
       serviceProvider: "Texas Ortho Spine Center (Dr. Bashir)",
       treatmentDetails: "Lumbar Spine MRI with Contrast",
       currentBalance: 2450.00,
-      status: "Active"
+      status: "Active",
+      caseProgress: {
+        currentStep: 1,
+        stepCompletionStatus: { 1: false, 2: false, 3: false, 4: false },
+        totalBillValue: 2450.00
+      }
     },
     {
       id: "2", 
       serviceProvider: "NuAdvance Orthopedics",
       treatmentDetails: "Physical Therapy Sessions (10)",
       currentBalance: 1200.00,
-      status: "Pending"
+      status: "Pending",
+      caseProgress: {
+        currentStep: 1,
+        stepCompletionStatus: { 1: false, 2: false, 3: false, 4: false },
+        totalBillValue: 1200.00
+      }
     },
     {
       id: "3",
       serviceProvider: "Metro Pain Management",
       treatmentDetails: "Epidural Steroid Injection",
       currentBalance: 850.00,
-      status: "Completed"
+      status: "Completed",
+      caseProgress: {
+        currentStep: 5,
+        stepCompletionStatus: { 1: true, 2: true, 3: true, 4: true },
+        totalBillValue: 850.00
+      }
     }
-  ];
+  ]);
+
+  // Load appointment progress from localStorage on component mount
+  useEffect(() => {
+    const savedProgress = localStorage.getItem('appointmentProgress');
+    if (savedProgress) {
+      const progressData = JSON.parse(savedProgress);
+      setAppointments(prev => 
+        prev.map(appointment => ({
+          ...appointment,
+          caseProgress: progressData[appointment.id]?.caseProgress || appointment.caseProgress,
+          currentBalance: progressData[appointment.id]?.currentBalance || appointment.currentBalance,
+          status: progressData[appointment.id]?.status || appointment.status
+        }))
+      );
+    }
+  }, []);
+
+  // Function to calculate progress percentage
+  const getProgressPercentage = (progress: CaseProgress) => {
+    const completedSteps = Object.values(progress.stepCompletionStatus).filter(Boolean).length;
+    return Math.round((completedSteps / 4) * 100);
+  };
+
+  // Function to get progress status text
+  const getProgressStatus = (progress: CaseProgress) => {
+    const completedSteps = Object.values(progress.stepCompletionStatus).filter(Boolean).length;
+    if (completedSteps === 0) return "Not Started";
+    if (completedSteps === 4) return "Completed";
+    return `${completedSteps}/4 Steps Complete`;
+  };
 
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([
     "medical_records_2024.pdf",
@@ -171,6 +232,7 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
                   <TableHead className="text-medical-dark font-semibold">Treatment Details</TableHead>
                   <TableHead className="text-medical-dark font-semibold">Current Balance</TableHead>
                   <TableHead className="text-medical-dark font-semibold">Status</TableHead>
+                  <TableHead className="text-medical-dark font-semibold">Case Progress</TableHead>
                   <TableHead className="text-medical-dark font-semibold text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -190,6 +252,23 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
                       <Badge className={getStatusColor(appointment.status)}>
                         {appointment.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2 min-w-[200px]">
+                        <div className="flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4 text-medical-primary" />
+                          <span className="text-sm font-medium text-medical-dark">
+                            {getProgressStatus(appointment.caseProgress)}
+                          </span>
+                        </div>
+                        <Progress 
+                          value={getProgressPercentage(appointment.caseProgress)} 
+                          className="h-2" 
+                        />
+                        <div className="text-xs text-medical-muted">
+                          {getProgressPercentage(appointment.caseProgress)}% Complete
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-2">
