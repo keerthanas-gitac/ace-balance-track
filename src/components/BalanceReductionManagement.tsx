@@ -57,6 +57,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
     
     localStorage.setItem('appointmentProgress', JSON.stringify(progressData));
   };
+
   const [appointmentHistory, setAppointmentHistory] = useState([
     {
       id: "1",
@@ -81,6 +82,13 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
       billAmount: 1200.00
     }
   ]);
+
+  // Function to calculate final balance after reductions
+  const calculateFinalBalance = (billAmount: number) => {
+    const completedSteps = Object.values(stepCompletionStatus).filter(Boolean).length;
+    // Reduce by 10% per completed step
+    return billAmount * (1 - (completedSteps * 0.1));
+  };
 
   const [expandedSteps, setExpandedSteps] = useState<number[]>([]);
 
@@ -311,7 +319,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                     <TableHead className="text-medical-dark font-semibold min-w-[140px]">Type of Request</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[200px]">Facility/Provider</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[120px]">Procedure Date</TableHead>
-                    <TableHead className="text-medical-dark font-semibold min-w-[140px]">Bill Amount</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[140px]">Current Balance</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[140px]">Final Balance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -393,6 +402,16 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                           placeholder="0.00"
                           step="0.01"
                         />
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-semibold text-medical-primary">
+                          ${calculateFinalBalance(row.billAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </div>
+                        {Object.values(stepCompletionStatus).filter(Boolean).length > 0 && (
+                          <div className="text-xs text-medical-muted mt-1">
+                            {(((row.billAmount - calculateFinalBalance(row.billAmount)) / row.billAmount) * 100).toFixed(1)}% reduction
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
