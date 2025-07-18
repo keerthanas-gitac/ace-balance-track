@@ -18,6 +18,12 @@ interface BalanceReductionManagementProps {
 export const BalanceReductionManagement = ({ onNavigate, appointmentId }: BalanceReductionManagementProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [reductionAmount, setReductionAmount] = useState(0);
+  const [stepCompletionStatus, setStepCompletionStatus] = useState({
+    1: false,
+    2: false,
+    3: false,
+    4: false
+  });
   const [appointmentHistory, setAppointmentHistory] = useState([
     {
       id: "1",
@@ -58,25 +64,25 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
       id: 1,
       title: "Closed Records Sent",
       details: "Medical records have been collected and sent to insurance companies for review.",
-      completed: currentStep >= 2
+      completed: stepCompletionStatus[1]
     },
     {
       id: 2,
       title: "Settled Pending Reductions",
       details: "Negotiating with providers for bill reductions and settlements.",
-      completed: currentStep >= 3
+      completed: stepCompletionStatus[2]
     },
     {
       id: 3,
       title: "Reductions Sent Pending Checks",
       details: "Reduction agreements sent to providers, awaiting payment confirmations.",
-      completed: currentStep >= 4
+      completed: stepCompletionStatus[3]
     },
     {
       id: 4,
       title: "Closed Checks Received",
       details: "Final payments received and case closed successfully.",
-      completed: currentStep >= 5
+      completed: stepCompletionStatus[4]
     }
   ];
 
@@ -96,13 +102,11 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
   };
 
   const markStepComplete = (stepId: number) => {
-    // stepId is 1-4 for the 4 status steps
-    // currentStep should be stepId + 1 to allow marking that step complete
-    if (currentStep === stepId + 1) {
-      setCurrentStep(stepId + 2); // Move to next step
-      console.log(`Step ${stepId} marked complete. Current step now: ${stepId + 2}`);
-      alert(`Step ${stepId} marked as complete! Moving to next step.`);
-    }
+    setStepCompletionStatus(prev => ({
+      ...prev,
+      [stepId]: true
+    }));
+    alert(`Step ${stepId} has been marked as complete!`);
   };
 
   const addNewRow = () => {
@@ -398,8 +402,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                       </div>
                     )}
                     
-                    {/* Mark as Complete Button - Show when this step is the current active step */}
-                    {currentStep === step.id + 1 && (
+                    {/* Mark as Complete Button - Show for any step that is not completed */}
+                    {!step.completed && (
                       <div className="mt-4">
                         <Button
                           onClick={() => markStepComplete(step.id)}
