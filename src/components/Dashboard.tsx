@@ -41,13 +41,6 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
       icon: Users,
       action: () => onNavigate("patients"),
       variant: "default" as const
-    },
-    {
-      title: "Provider Follow-up",
-      description: "Track pending balances and follow-ups",
-      icon: FileText,
-      action: () => onNavigate("providers"),
-      variant: "secondary" as const
     }
   ];
 
