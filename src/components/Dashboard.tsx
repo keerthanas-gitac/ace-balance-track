@@ -41,6 +41,13 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
       icon: Users,
       action: () => onNavigate("patients"),
       variant: "default" as const
+    },
+    {
+      title: "Reports",
+      description: "Download reports grouped by provider or attorney",
+      icon: FileText,
+      action: () => onNavigate("reports"),
+      variant: "secondary" as const
     }
   ];
 
