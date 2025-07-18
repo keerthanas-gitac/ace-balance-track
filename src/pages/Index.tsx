@@ -1,14 +1,54 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { LoginForm } from "@/components/LoginForm";
+import { Dashboard } from "@/components/Dashboard";
+import { PatientList } from "@/components/PatientList";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentPage, setCurrentPage] = useState("dashboard");
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    setCurrentPage("dashboard");
+  };
+
+  const handleNavigate = (page: string, patientId?: string) => {
+    setCurrentPage(page);
+    if (patientId) {
+      // Store patient ID for detailed view
+      console.log("Navigate to patient:", patientId);
+    }
+  };
+
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={handleLogin} />;
+  }
+
+  // Main application routing
+  switch (currentPage) {
+    case "patients":
+      return <PatientList onNavigate={handleNavigate} />;
+    case "import":
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">CSV Import</h1>
+            <p className="text-muted-foreground">Import functionality coming soon...</p>
+          </div>
+        </div>
+      );
+    case "providers":
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Provider Follow-up</h1>
+            <p className="text-muted-foreground">Provider management coming soon...</p>
+          </div>
+        </div>
+      );
+    default:
+      return <Dashboard onNavigate={handleNavigate} />;
+  }
 };
 
 export default Index;
