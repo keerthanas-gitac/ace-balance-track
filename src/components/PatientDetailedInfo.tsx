@@ -1,0 +1,235 @@
+import { useState } from "react";
+import { ArrowLeft, Upload, FileText, Edit, Eye, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Layout } from "@/components/Layout";
+
+interface PatientDetailedInfoProps {
+  onNavigate: (page: string, appointmentId?: string) => void;
+  patientId: string;
+}
+
+export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedInfoProps) => {
+  // Mock patient data - in real app this would come from props or API
+  const patient = {
+    name: "John Doe",
+    dob: "1985-03-15",
+    registrationDate: "2024-01-10",
+    gender: "Male",
+    caseNumber: "ACE-2024-001"
+  };
+
+  // Mock appointments data
+  const appointments = [
+    {
+      id: "1",
+      serviceProvider: "Texas Ortho Spine Center (Dr. Bashir)",
+      treatmentDetails: "Lumbar Spine MRI with Contrast",
+      currentBalance: 2450.00,
+      status: "Active"
+    },
+    {
+      id: "2", 
+      serviceProvider: "NuAdvance Orthopedics",
+      treatmentDetails: "Physical Therapy Sessions (10)",
+      currentBalance: 1200.00,
+      status: "Pending"
+    },
+    {
+      id: "3",
+      serviceProvider: "Metro Pain Management",
+      treatmentDetails: "Epidural Steroid Injection",
+      currentBalance: 850.00,
+      status: "Completed"
+    }
+  ];
+
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([
+    "medical_records_2024.pdf",
+    "insurance_claim_form.pdf"
+  ]);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const newFiles = files.map(file => file.name);
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Active": return "bg-medical-success text-medical-success-foreground";
+      case "Pending": return "bg-medical-warning text-medical-warning-foreground";
+      case "Completed": return "bg-medical-info text-medical-info-foreground";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  return (
+    <Layout onNavigate={onNavigate}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigate("patients")}
+            className="text-medical-primary hover:text-medical-primary/80"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Patients
+          </Button>
+          <h1 className="text-3xl font-bold text-medical-dark">Patient's Detailed Info</h1>
+        </div>
+
+        {/* Patient Information Card */}
+        <Card className="border-medical-border bg-gradient-to-r from-medical-card to-medical-card/80">
+          <CardHeader>
+            <CardTitle className="text-medical-dark flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Patient Case Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Patient Details */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-medical-muted">Patient Name</label>
+                <p className="text-lg font-semibold text-medical-dark">{patient.name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-medical-muted">Date of Birth</label>
+                <p className="text-medical-dark">{new Date(patient.dob).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-medical-muted">Gender</label>
+                <p className="text-medical-dark">{patient.gender}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-medical-muted">Date of Registration</label>
+                <p className="text-medical-dark">{new Date(patient.registrationDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-medical-muted">Case Number</label>
+                <p className="text-lg font-mono text-medical-primary">{patient.caseNumber}</p>
+              </div>
+            </div>
+
+            {/* Document Upload Section */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-medical-muted">Case Documents</label>
+                <div className="mt-2 p-4 border-2 border-dashed border-medical-border rounded-lg bg-medical-background/50">
+                  <div className="text-center">
+                    <Upload className="h-8 w-8 text-medical-muted mx-auto mb-2" />
+                    <input
+                      type="file"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="file-upload"
+                      accept=".pdf,.doc,.docx,.jpg,.png"
+                    />
+                    <label
+                      htmlFor="file-upload"
+                      className="cursor-pointer text-sm text-medical-primary hover:text-medical-primary/80"
+                    >
+                      Upload Documents
+                    </label>
+                  </div>
+                  
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center gap-2 text-xs text-medical-muted">
+                          <FileText className="h-3 w-3" />
+                          {file}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Appointments Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-medical-dark">Appointment History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-medical-dark font-semibold">Service Provider Name</TableHead>
+                  <TableHead className="text-medical-dark font-semibold">Treatment Details</TableHead>
+                  <TableHead className="text-medical-dark font-semibold">Current Balance</TableHead>
+                  <TableHead className="text-medical-dark font-semibold">Status</TableHead>
+                  <TableHead className="text-medical-dark font-semibold text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {appointments.map((appointment) => (
+                  <TableRow key={appointment.id} className="hover:bg-medical-background/50">
+                    <TableCell className="font-medium text-medical-dark">
+                      {appointment.serviceProvider}
+                    </TableCell>
+                    <TableCell className="text-medical-muted">
+                      {appointment.treatmentDetails}
+                    </TableCell>
+                    <TableCell className="font-semibold text-medical-dark">
+                      ${appointment.currentBalance.toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(appointment.status)}>
+                        {appointment.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onNavigate("balance-reduction", appointment.id)}
+                          className="h-8 w-8 p-0 text-medical-primary hover:text-medical-primary/80"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-medical-info hover:text-medical-info/80"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-medical-danger hover:text-medical-danger/80"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            {appointments.length === 0 && (
+              <div className="text-center py-8 text-medical-muted">
+                No appointments found for this patient.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
+  );
+};

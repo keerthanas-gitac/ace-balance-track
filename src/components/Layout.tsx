@@ -5,9 +5,10 @@ import { LogOut, Menu, User } from "lucide-react";
 interface LayoutProps {
   children: ReactNode;
   title?: string;
+  onNavigate?: (page: string, id?: string) => void;
 }
 
-export const Layout = ({ children, title = "ACE Physician Service" }: LayoutProps) => {
+export const Layout = ({ children, title = "ACE Physician Service", onNavigate }: LayoutProps) => {
   const handleLogout = () => {
     // TODO: Implement logout logic
     console.log("Logout clicked");

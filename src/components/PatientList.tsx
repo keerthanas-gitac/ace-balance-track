@@ -190,7 +190,7 @@ export const PatientList = ({ onNavigate }: PatientListProps) => {
                 <Button 
                   variant="outline" 
                   className="w-full group-hover:border-primary group-hover:text-primary transition-colors"
-                  onClick={() => onNavigate("patient-detail", patient.id)}
+                  onClick={() => onNavigate("patient-details", patient.id)}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View Details

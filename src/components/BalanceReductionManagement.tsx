@@ -1,0 +1,356 @@
+import { useState } from "react";
+import { ArrowLeft, Plus, ChevronDown, ChevronUp, CheckCircle, Clock, FileText, DollarSign, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Layout } from "@/components/Layout";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+interface BalanceReductionManagementProps {
+  onNavigate: (page: string, appointmentId?: string) => void;
+  appointmentId: string;
+}
+
+export const BalanceReductionManagement = ({ onNavigate, appointmentId }: BalanceReductionManagementProps) => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [appointmentHistory, setAppointmentHistory] = useState([
+    {
+      id: "1",
+      dateOfEntry: "2024-01-15",
+      deadline: "2024-02-15",
+      status: "Completed",
+      notes: "Initial consultation - Active case",
+      typeOfRequest: "Billing Update",
+      facilityProvider: "Texas Ortho Spine Center (Bashir)",
+      procedureDate: "2024-01-10",
+      billAmount: 2450.00
+    },
+    {
+      id: "2",
+      dateOfEntry: "2024-01-20",
+      deadline: "2024-02-20",
+      status: "Pending",
+      notes: "Follow-up treatment - Active",
+      typeOfRequest: "Balance Only",
+      facilityProvider: "NuAdvance Orthopedics",
+      procedureDate: "2024-01-18",
+      billAmount: 1200.00
+    }
+  ]);
+
+  const [expandedSteps, setExpandedSteps] = useState<number[]>([]);
+
+  const milestones = [
+    { id: 1, title: "Active Care", status: "completed" },
+    { id: 2, title: "Closed Records Sent", status: currentStep >= 2 ? "completed" : "pending" },
+    { id: 3, title: "Settled Pending Reductions", status: currentStep >= 3 ? "completed" : "pending" },
+    { id: 4, title: "Reductions Sent Pending Checks", status: currentStep >= 4 ? "completed" : "pending" },
+    { id: 5, title: "Closed Checks Received", status: currentStep >= 5 ? "completed" : "pending" }
+  ];
+
+  const statusSteps = [
+    {
+      id: 1,
+      title: "Closed Records Sent",
+      details: "Medical records have been collected and sent to insurance companies for review.",
+      completed: currentStep >= 2
+    },
+    {
+      id: 2,
+      title: "Settled Pending Reductions",
+      details: "Negotiating with providers for bill reductions and settlements.",
+      completed: currentStep >= 3
+    },
+    {
+      id: 3,
+      title: "Reductions Sent Pending Checks",
+      details: "Reduction agreements sent to providers, awaiting payment confirmations.",
+      completed: currentStep >= 4
+    },
+    {
+      id: 4,
+      title: "Closed Checks Received",
+      details: "Final payments received and case closed successfully.",
+      completed: currentStep >= 5
+    }
+  ];
+
+  const totalBillValue = appointmentHistory.reduce((sum, item) => sum + item.billAmount, 0);
+
+  const toggleStepExpansion = (stepId: number) => {
+    setExpandedSteps(prev => 
+      prev.includes(stepId) 
+        ? prev.filter(id => id !== stepId)
+        : [...prev, stepId]
+    );
+  };
+
+  const handleCloseCase = () => {
+    setCurrentStep(5);
+    alert("Case has been closed successfully!");
+  };
+
+  const addNewRow = () => {
+    const newRow = {
+      id: (appointmentHistory.length + 1).toString(),
+      dateOfEntry: new Date().toISOString().split('T')[0],
+      deadline: "",
+      status: "Pending",
+      notes: "",
+      typeOfRequest: "Billing Update",
+      facilityProvider: "",
+      procedureDate: "",
+      billAmount: 0
+    };
+    setAppointmentHistory([...appointmentHistory, newRow]);
+  };
+
+  const updateRow = (id: string, field: string, value: any) => {
+    setAppointmentHistory(prev =>
+      prev.map(row => row.id === id ? { ...row, [field]: value } : row)
+    );
+  };
+
+  return (
+    <Layout onNavigate={onNavigate}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigate("patient-details")}
+            className="text-medical-primary hover:text-medical-primary/80"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Patient Details
+          </Button>
+          <h1 className="text-3xl font-bold text-medical-dark">Balance & Reduction Management</h1>
+        </div>
+
+        {/* Milestone Progress Bar */}
+        <Card className="border-medical-border">
+          <CardHeader>
+            <CardTitle className="text-medical-dark">Case Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between relative">
+              {milestones.map((milestone, index) => (
+                <div key={milestone.id} className="flex flex-col items-center relative z-10">
+                  <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${
+                    milestone.status === "completed" 
+                      ? "bg-medical-success border-medical-success text-white" 
+                      : "bg-white border-medical-border text-medical-muted"
+                  }`}>
+                    {milestone.status === "completed" ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : (
+                      <Clock className="h-5 w-5" />
+                    )}
+                  </div>
+                  <span className={`mt-2 text-xs text-center max-w-[100px] ${
+                    milestone.status === "completed" ? "text-medical-success font-medium" : "text-medical-muted"
+                  }`}>
+                    {milestone.title}
+                  </span>
+                  {index < milestones.length - 1 && (
+                    <div className={`absolute top-5 left-10 w-[calc(100vw/5-2.5rem)] h-0.5 ${
+                      milestones[index + 1].status === "completed" ? "bg-medical-success" : "bg-medical-border"
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Appointment History Table */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-medical-dark">Appointment History</CardTitle>
+            <Button onClick={addNewRow} size="sm" className="bg-medical-primary hover:bg-medical-primary/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Entry
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-medical-dark font-semibold min-w-[120px]">Date of Entry</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[120px]">Deadline</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[120px]">Status</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[150px]">Notes</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[140px]">Type of Request</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[200px]">Facility/Provider</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[120px]">Procedure Date</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[140px]">Bill Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {appointmentHistory.map((row) => (
+                    <TableRow key={row.id} className="hover:bg-medical-background/50">
+                      <TableCell>
+                        <Input
+                          type="date"
+                          value={row.dateOfEntry}
+                          onChange={(e) => updateRow(row.id, "dateOfEntry", e.target.value)}
+                          className="border-medical-border"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="date"
+                          value={row.deadline}
+                          onChange={(e) => updateRow(row.id, "deadline", e.target.value)}
+                          className="border-medical-border"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Select value={row.status} onValueChange={(value) => updateRow(row.id, "status", value)}>
+                          <SelectTrigger className="border-medical-border">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Completed">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Textarea
+                          value={row.notes}
+                          onChange={(e) => updateRow(row.id, "notes", e.target.value)}
+                          className="border-medical-border min-h-[60px]"
+                          placeholder="Case notes..."
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Select value={row.typeOfRequest} onValueChange={(value) => updateRow(row.id, "typeOfRequest", value)}>
+                          <SelectTrigger className="border-medical-border">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Billing Update">Billing Update</SelectItem>
+                            <SelectItem value="Balance Only">Balance Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Select value={row.facilityProvider} onValueChange={(value) => updateRow(row.id, "facilityProvider", value)}>
+                          <SelectTrigger className="border-medical-border">
+                            <SelectValue placeholder="Select provider..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Texas Ortho Spine Center (Bashir)">Texas Ortho Spine Center (Bashir)</SelectItem>
+                            <SelectItem value="NuAdvance Orthopedics">NuAdvance Orthopedics</SelectItem>
+                            <SelectItem value="Metro Pain Management">Metro Pain Management</SelectItem>
+                            <SelectItem value="Dallas Sports Medicine">Dallas Sports Medicine</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="date"
+                          value={row.procedureDate}
+                          onChange={(e) => updateRow(row.id, "procedureDate", e.target.value)}
+                          className="border-medical-border"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={row.billAmount}
+                          onChange={(e) => updateRow(row.id, "billAmount", parseFloat(e.target.value) || 0)}
+                          className="border-medical-border"
+                          placeholder="0.00"
+                          step="0.01"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Total Bill Value */}
+            <div className="mt-6 p-4 bg-medical-card rounded-lg border border-medical-border">
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-semibold text-medical-dark">Total Bill Value:</span>
+                <span className="text-2xl font-bold text-medical-primary">
+                  ${totalBillValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+
+            {/* Close Case Button */}
+            <div className="mt-6 flex justify-center">
+              <Button
+                onClick={handleCloseCase}
+                size="lg"
+                className="bg-medical-danger hover:bg-medical-danger/90 text-white px-8 py-3"
+                disabled={currentStep >= 5}
+              >
+                {currentStep >= 5 ? "Case Closed" : "Close the Case"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Status Cards */}
+        <div className="grid gap-4">
+          <h2 className="text-xl font-semibold text-medical-dark">Case Status Steps</h2>
+          {statusSteps.map((step) => (
+            <Card key={step.id} className={`border ${step.completed ? 'border-medical-success bg-medical-success/5' : 'border-medical-border'}`}>
+              <Collapsible
+                open={expandedSteps.includes(step.id)}
+                onOpenChange={() => toggleStepExpansion(step.id)}
+              >
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-medical-background/30 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          step.completed ? 'bg-medical-success text-white' : 'bg-medical-muted text-white'
+                        }`}>
+                          {step.completed ? (
+                            <CheckCircle className="h-4 w-4" />
+                          ) : (
+                            <Clock className="h-4 w-4" />
+                          )}
+                        </div>
+                        <CardTitle className={`text-lg ${step.completed ? 'text-medical-success' : 'text-medical-dark'}`}>
+                          Step {step.id}: {step.title}
+                        </CardTitle>
+                        <Badge variant={step.completed ? "default" : "secondary"} className={
+                          step.completed ? "bg-medical-success text-white" : "bg-medical-muted text-white"
+                        }>
+                          {step.completed ? "Completed" : "Pending"}
+                        </Badge>
+                      </div>
+                      {expandedSteps.includes(step.id) ? (
+                        <ChevronUp className="h-4 w-4 text-medical-muted" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-medical-muted" />
+                      )}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <p className="text-medical-muted">{step.details}</p>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </Layout>
+  );
+};
