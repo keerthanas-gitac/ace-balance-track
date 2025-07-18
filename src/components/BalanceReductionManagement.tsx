@@ -159,7 +159,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                   <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${
                     milestone.status === "completed" 
                       ? "bg-medical-success border-medical-success text-white" 
-                      : "bg-white border-medical-border text-medical-muted"
+                      : "bg-orange-100 border-orange-400 text-orange-600"
                   }`}>
                     {milestone.status === "completed" ? (
                       <CheckCircle className="h-5 w-5" />
@@ -168,7 +168,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                     )}
                   </div>
                   <span className={`mt-2 text-xs text-center max-w-[100px] ${
-                    milestone.status === "completed" ? "text-medical-success font-medium" : "text-medical-muted"
+                    milestone.status === "completed" ? "text-medical-success font-medium" : "text-orange-600"
                   }`}>
                     {milestone.title}
                   </span>
@@ -327,7 +327,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
         <div className="grid gap-4">
           <h2 className="text-xl font-semibold text-medical-dark">Case Status Steps</h2>
           {statusSteps.map((step) => (
-            <Card key={step.id} className={`border ${step.completed ? 'border-medical-success bg-medical-success/5' : 'border-medical-border'}`}>
+            <Card key={step.id} className={`border ${step.completed ? 'border-medical-success bg-medical-success/5' : 'border-orange-300 bg-orange-50/30'}`}>
               <Collapsible
                 open={expandedSteps.includes(step.id)}
                 onOpenChange={() => toggleStepExpansion(step.id)}
@@ -337,7 +337,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          step.completed ? 'bg-medical-success text-white' : 'bg-medical-muted text-white'
+                          step.completed ? 'bg-medical-success text-white' : 'bg-orange-400 text-white'
                         }`}>
                           {step.completed ? (
                             <CheckCircle className="h-4 w-4" />
@@ -345,11 +345,11 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                             <Clock className="h-4 w-4" />
                           )}
                         </div>
-                        <CardTitle className={`text-lg ${step.completed ? 'text-medical-success' : 'text-medical-dark'}`}>
+                        <CardTitle className={`text-lg ${step.completed ? 'text-medical-success' : 'text-orange-600'}`}>
                           Step {step.id}: {step.title}
                         </CardTitle>
                         <Badge variant={step.completed ? "default" : "secondary"} className={
-                          step.completed ? "bg-medical-success text-white" : "bg-medical-muted text-white"
+                          step.completed ? "bg-medical-success text-white" : "bg-orange-400 text-white"
                         }>
                           {step.completed ? "Completed" : "Pending"}
                         </Badge>
