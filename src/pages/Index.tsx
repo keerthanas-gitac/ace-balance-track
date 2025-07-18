@@ -4,6 +4,8 @@ import { Dashboard } from "@/components/Dashboard";
 import { PatientList } from "@/components/PatientList";
 import { PatientDetailedInfo } from "@/components/PatientDetailedInfo";
 import { BalanceReductionManagement } from "@/components/BalanceReductionManagement";
+import { ProviderFollowUp } from "@/components/ProviderFollowUp";
+import { CSVUpload } from "@/components/CSVUpload";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -38,23 +40,9 @@ const Index = () => {
     case "balance-reduction":
       return <BalanceReductionManagement onNavigate={handleNavigate} appointmentId={selectedAppointmentId} />;
     case "import":
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">CSV Import</h1>
-            <p className="text-muted-foreground">Import functionality coming soon...</p>
-          </div>
-        </div>
-      );
+      return <CSVUpload onNavigate={handleNavigate} />;
     case "providers":
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Provider Follow-up</h1>
-            <p className="text-muted-foreground">Provider management coming soon...</p>
-          </div>
-        </div>
-      );
+      return <ProviderFollowUp onNavigate={handleNavigate} />;
     default:
       return <Dashboard onNavigate={handleNavigate} />;
   }
