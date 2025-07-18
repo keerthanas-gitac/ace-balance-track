@@ -397,8 +397,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                       </div>
                     )}
                     
-                    {/* Mark as Complete Button */}
-                    {currentStep === step.id + 1 && !step.completed && (
+                    {/* Mark as Complete Button - Show when this step is the current active step */}
+                    {currentStep === step.id + 1 && (
                       <div className="mt-4">
                         <Button
                           onClick={() => markStepComplete(step.id)}
