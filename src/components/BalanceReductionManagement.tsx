@@ -17,6 +17,7 @@ interface BalanceReductionManagementProps {
 
 export const BalanceReductionManagement = ({ onNavigate, appointmentId }: BalanceReductionManagementProps) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [reductionAmount, setReductionAmount] = useState(0);
   const [appointmentHistory, setAppointmentHistory] = useState([
     {
       id: "1",
@@ -90,8 +91,15 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
   };
 
   const handleCloseCase = () => {
-    setCurrentStep(5);
-    alert("Case has been closed successfully!");
+    setCurrentStep(2); // Move to step 1 (Closed Records Sent)
+    alert("Case has been closed and moved to Step 1!");
+  };
+
+  const markStepComplete = (stepId: number) => {
+    if (stepId === currentStep) {
+      setCurrentStep(stepId + 1);
+      alert(`Step ${stepId} marked as complete!`);
+    }
   };
 
   const addNewRow = () => {
@@ -349,7 +357,55 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <CardContent className="pt-0">
-                    <p className="text-medical-muted">{step.details}</p>
+                    <p className="text-medical-muted mb-4">{step.details}</p>
+                    
+                    {/* Step 2 (Settled Pending Reductions) - Reduction Amount Entry */}
+                    {step.id === 2 && (
+                      <div className="space-y-4 p-4 bg-medical-background rounded-lg">
+                        <h4 className="font-semibold text-medical-dark">Reduction Management</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-medical-dark">Total Bill Value</label>
+                            <Input 
+                              value={`$${totalBillValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                              disabled
+                              className="bg-gray-100"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-medical-dark">Reduction Amount</label>
+                            <Input
+                              type="number"
+                              value={reductionAmount}
+                              onChange={(e) => setReductionAmount(parseFloat(e.target.value) || 0)}
+                              placeholder="Enter reduction amount"
+                              className="border-medical-border"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <div className="flex justify-between text-sm">
+                            <span>Final Amount After Reduction:</span>
+                            <span className="font-semibold">
+                              ${(totalBillValue - reductionAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Mark as Complete Button */}
+                    {currentStep === step.id + 1 && !step.completed && (
+                      <div className="mt-4">
+                        <Button
+                          onClick={() => markStepComplete(step.id + 1)}
+                          className="bg-medical-success hover:bg-medical-success/90 text-white"
+                        >
+                          Mark Step {step.id} as Complete
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </CollapsibleContent>
               </Collapsible>
