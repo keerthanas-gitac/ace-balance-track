@@ -323,7 +323,6 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                     <TableHead className="text-medical-dark font-semibold min-w-[120px]">Procedure Date</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[140px]">Current Balance</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[200px]">Date Range</TableHead>
-                    <TableHead className="text-medical-dark font-semibold min-w-[140px]">Final Balance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -362,8 +361,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Billing Update">Billing Update</SelectItem>
-                            <SelectItem value="Balance Only">Balance Only</SelectItem>
+                            <SelectItem value="with Affidavit">with Affidavit</SelectItem>
+                            <SelectItem value="without Affidavit">without Affidavit</SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
@@ -419,16 +418,6 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                             />
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-semibold text-medical-primary">
-                          ${calculateFinalBalance(row.billAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </div>
-                        {Object.values(stepCompletionStatus).filter(Boolean).length > 0 && (
-                          <div className="text-xs text-medical-muted mt-1">
-                            {(((row.billAmount - calculateFinalBalance(row.billAmount)) / row.billAmount) * 100).toFixed(1)}% reduction
-                          </div>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))}
