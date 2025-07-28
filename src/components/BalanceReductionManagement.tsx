@@ -316,13 +316,13 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-medical-dark font-semibold min-w-[120px]">Date of Entry</TableHead>
-                    <TableHead className="text-medical-dark font-semibold min-w-[200px]">Date Range</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[120px]">Status</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[150px]">Notes</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[140px]">Type of Request</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[200px]">Facility/Provider</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[120px]">Procedure Date</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[140px]">Current Balance</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[200px]">Date Range</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[140px]">Final Balance</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -336,28 +336,6 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                           onChange={(e) => updateRow(row.id, "dateOfEntry", e.target.value)}
                           className="border-medical-border"
                         />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
-                            <label className="text-xs text-medical-muted">Start Date</label>
-                            <Input
-                              type="date"
-                              value={row.dateRangeStart}
-                              onChange={(e) => updateRow(row.id, "dateRangeStart", e.target.value)}
-                              className="border-medical-border"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <label className="text-xs text-medical-muted">End Date</label>
-                            <Input
-                              type="date"
-                              value={row.dateRangeEnd}
-                              onChange={(e) => updateRow(row.id, "dateRangeEnd", e.target.value)}
-                              className="border-medical-border"
-                            />
-                          </div>
-                        </div>
                       </TableCell>
                       <TableCell>
                         <Select value={row.status} onValueChange={(value) => updateRow(row.id, "status", value)}>
@@ -419,6 +397,28 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                           placeholder="0.00"
                           step="0.01"
                         />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="text-xs text-medical-muted">Start Date</label>
+                            <Input
+                              type="date"
+                              value={row.dateRangeStart}
+                              onChange={(e) => updateRow(row.id, "dateRangeStart", e.target.value)}
+                              className="border-medical-border"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs text-medical-muted">End Date</label>
+                            <Input
+                              type="date"
+                              value={row.dateRangeEnd}
+                              onChange={(e) => updateRow(row.id, "dateRangeEnd", e.target.value)}
+                              className="border-medical-border"
+                            />
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="font-semibold text-medical-primary">
