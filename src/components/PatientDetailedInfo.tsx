@@ -190,7 +190,7 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
             {/* Document Upload Section */}
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-medical-muted">Case Documents</label>
+                <label className="text-sm font-medium text-medical-muted">Import Case Date</label>
                 <div className="mt-2 p-4 border-2 border-dashed border-medical-border rounded-lg bg-medical-background/50">
                   <div className="text-center">
                     <Upload className="h-8 w-8 text-medical-muted mx-auto mb-2" />
@@ -209,17 +209,6 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
                       Upload Documents
                     </label>
                   </div>
-                  
-                  {uploadedFiles.length > 0 && (
-                    <div className="mt-3 space-y-1">
-                      {uploadedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center gap-2 text-xs text-medical-muted">
-                          <FileText className="h-3 w-3" />
-                          {file}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
