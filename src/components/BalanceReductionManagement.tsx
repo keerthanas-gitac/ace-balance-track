@@ -62,7 +62,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
     {
       id: "1",
       dateOfEntry: "2024-01-15",
-      deadline: "2024-02-15",
+      dateRangeStart: "2024-01-15",
+      dateRangeEnd: "2024-02-15",
       status: "Completed",
       notes: "Initial consultation - Active case",
       typeOfRequest: "Billing Update",
@@ -73,7 +74,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
     {
       id: "2",
       dateOfEntry: "2024-01-20",
-      deadline: "2024-02-20",
+      dateRangeStart: "2024-01-20",
+      dateRangeEnd: "2024-02-20",
       status: "Pending",
       notes: "Follow-up treatment - Active",
       typeOfRequest: "Balance Only",
@@ -228,7 +230,8 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
     const newRow = {
       id: (appointmentHistory.length + 1).toString(),
       dateOfEntry: new Date().toISOString().split('T')[0],
-      deadline: "",
+      dateRangeStart: "",
+      dateRangeEnd: "",
       status: "Pending",
       notes: "",
       typeOfRequest: "Billing Update",
@@ -313,7 +316,7 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-medical-dark font-semibold min-w-[120px]">Date of Entry</TableHead>
-                    <TableHead className="text-medical-dark font-semibold min-w-[120px]">Deadline</TableHead>
+                    <TableHead className="text-medical-dark font-semibold min-w-[200px]">Date Range</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[120px]">Status</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[150px]">Notes</TableHead>
                     <TableHead className="text-medical-dark font-semibold min-w-[140px]">Type of Request</TableHead>
@@ -335,12 +338,26 @@ export const BalanceReductionManagement = ({ onNavigate, appointmentId }: Balanc
                         />
                       </TableCell>
                       <TableCell>
-                        <Input
-                          type="date"
-                          value={row.deadline}
-                          onChange={(e) => updateRow(row.id, "deadline", e.target.value)}
-                          className="border-medical-border"
-                        />
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="text-xs text-medical-muted">Start Date</label>
+                            <Input
+                              type="date"
+                              value={row.dateRangeStart}
+                              onChange={(e) => updateRow(row.id, "dateRangeStart", e.target.value)}
+                              className="border-medical-border"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs text-medical-muted">End Date</label>
+                            <Input
+                              type="date"
+                              value={row.dateRangeEnd}
+                              onChange={(e) => updateRow(row.id, "dateRangeEnd", e.target.value)}
+                              className="border-medical-border"
+                            />
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Select value={row.status} onValueChange={(value) => updateRow(row.id, "status", value)}>
