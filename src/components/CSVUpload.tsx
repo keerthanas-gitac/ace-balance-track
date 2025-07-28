@@ -5,15 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   Upload, 
   XCircle, 
   Trash2,
   Eye,
-  ArrowLeft,
-  Download
+  ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -51,7 +49,6 @@ const mockValidationErrors: ValidationError[] = [
 
 export const CSVUpload = ({ onNavigate }: CSVUploadProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadType, setUploadType] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
@@ -89,10 +86,10 @@ export const CSVUpload = ({ onNavigate }: CSVUploadProps) => {
   };
 
   const simulateUpload = async () => {
-    if (!selectedFile || !uploadType) {
+    if (!selectedFile) {
       toast({
         title: "Missing Information",
-        description: "Please select a file and upload type",
+        description: "Please select a file",
         variant: "destructive"
       });
       return;
@@ -125,33 +122,8 @@ export const CSVUpload = ({ onNavigate }: CSVUploadProps) => {
 
     setIsUploading(false);
     setSelectedFile(null);
-    setUploadType("");
     setShowPreview(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const downloadTemplate = (type: string) => {
-    // In a real app, this would download actual templates
-    const templates = {
-      "Patient Data": "patient_id,first_name,last_name,email,phone,date_of_birth,address",
-      "Appointments": "appointment_id,patient_id,provider_id,date,time,status,notes",
-      "Provider Data": "provider_id,name,specialty,email,phone,license_number",
-      "Insurance Data": "policy_id,patient_id,insurance_company,policy_number,group_number"
-    };
-    
-    const content = templates[type as keyof typeof templates] || "";
-    const blob = new Blob([content], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${type.toLowerCase().replace(' ', '_')}_template.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Template Downloaded",
-      description: `${type} template has been downloaded`
-    });
   };
 
   return (
@@ -182,83 +154,42 @@ export const CSVUpload = ({ onNavigate }: CSVUploadProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="uploadType">Data Type</Label>
-                  <Select value={uploadType} onValueChange={setUploadType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select data type..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Patient Data">Patient Data</SelectItem>
-                      <SelectItem value="Appointments">Appointments</SelectItem>
-                      <SelectItem value="Provider Data">Provider Data</SelectItem>
-                      <SelectItem value="Insurance Data">Insurance Data</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="space-y-4 max-w-md">
+              <div>
+                <Label htmlFor="file">CSV File</Label>
+                <Input
+                  ref={fileInputRef}
+                  id="file"
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileSelect}
+                  disabled={isUploading}
+                />
+              </div>
 
-                <div>
-                  <Label htmlFor="file">CSV File</Label>
-                  <Input
-                    ref={fileInputRef}
-                    id="file"
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileSelect}
-                    disabled={isUploading}
-                  />
-                </div>
-
-                {selectedFile && (
-                  <div className="p-4 bg-medical-light rounded border">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{selectedFile.name}</p>
-                        <p className="text-sm text-medical-muted">
-                          {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedFile(null);
-                          setShowPreview(false);
-                          if (fileInputRef.current) fileInputRef.current.value = "";
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+              {selectedFile && (
+                <div className="p-4 bg-medical-light rounded border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{selectedFile.name}</p>
+                      <p className="text-sm text-medical-muted">
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setShowPreview(false);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded">
-                  <h3 className="font-medium text-blue-900 mb-2">Upload Guidelines</h3>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• File must be in CSV format</li>
-                    <li>• Maximum file size: 10MB</li>
-                    <li>• First row should contain column headers</li>
-                    <li>• Use our templates for best results</li>
-                    <li>• Data will be validated before import</li>
-                  </ul>
                 </div>
-
-                {uploadType && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => downloadTemplate(uploadType)}
-                    className="w-full"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download {uploadType} Template
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
 
             {isUploading && (
@@ -334,7 +265,7 @@ export const CSVUpload = ({ onNavigate }: CSVUploadProps) => {
             <div className="flex gap-3">
               <Button 
                 onClick={simulateUpload}
-                disabled={!selectedFile || !uploadType || isUploading}
+                disabled={!selectedFile || isUploading}
                 className="flex-1"
               >
                 {isUploading ? "Uploading..." : "Upload File"}
@@ -343,7 +274,6 @@ export const CSVUpload = ({ onNavigate }: CSVUploadProps) => {
                 variant="outline"
                 onClick={() => {
                   setSelectedFile(null);
-                  setUploadType("");
                   setShowPreview(false);
                   setValidationErrors([]);
                   if (fileInputRef.current) fileInputRef.current.value = "";
