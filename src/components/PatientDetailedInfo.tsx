@@ -185,6 +185,27 @@ export const PatientDetailedInfo = ({ onNavigate, patientId }: PatientDetailedIn
                 <label className="text-sm font-medium text-medical-muted">Case Number</label>
                 <p className="text-lg font-mono text-medical-primary">{patient.caseNumber}</p>
               </div>
+              <div>
+                <label className="text-sm font-medium text-medical-muted">Total Account Balance</label>
+                <div className="space-y-2">
+                  <div className="text-xl font-bold text-medical-dark">
+                    ${appointments.reduce((total, appointment) => total + appointment.currentBalance, 0).toLocaleString()}
+                  </div>
+                  <div className="text-lg font-semibold text-medical-primary">
+                    Final: ${appointments.reduce((total, appointment) => 
+                      total + calculateFinalBalance(appointment.currentBalance, appointment.caseProgress), 0
+                    ).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </div>
+                  <div className="text-sm text-medical-muted">
+                    Total Savings: ${(
+                      appointments.reduce((total, appointment) => total + appointment.currentBalance, 0) -
+                      appointments.reduce((total, appointment) => 
+                        total + calculateFinalBalance(appointment.currentBalance, appointment.caseProgress), 0
+                      )
+                    ).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Document Upload Section */}
