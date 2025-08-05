@@ -30,46 +30,16 @@ interface ReportsProps {
   onNavigate: (page: string) => void;
 }
 
-const mockReports = [
+const mockPatientWiseReports = [
   {
     id: "1",
-    name: "Provider Pending Follow-up Report - Patient Wise",
-    description: "Detailed pending follow-ups organized by individual patients",
+    name: "Patient Wise Report",
+    description: "Comprehensive patient details and all services taken with complete system data",
     type: "patient-wise",
     lastGenerated: "2024-01-15",
     records: 89,
-    status: "pending",
-    pendingCount: 89
-  },
-  {
-    id: "2", 
-    name: "Provider Pending Follow-up Report - Status Wise",
-    description: "Pending follow-ups grouped by current status categories",
-    type: "status-wise",
-    lastGenerated: "2024-01-14",
-    records: 156,
-    status: "pending",
-    pendingCount: 67
-  },
-  {
-    id: "3",
-    name: "Provider Pending Follow-up Report - Overdue Items",
-    description: "Critical overdue follow-ups requiring immediate attention",
-    type: "patient-wise",
-    lastGenerated: "2024-01-13",
-    records: 23,
-    status: "overdue",
-    pendingCount: 23
-  },
-  {
-    id: "4",
-    name: "Provider Pending Follow-up Report - Weekly Summary",
-    description: "Weekly summary of all pending provider follow-ups",
-    type: "status-wise",
-    lastGenerated: "2024-01-12",
-    records: 134,
-    status: "pending",
-    pendingCount: 98
+    status: "available",
+    totalPatients: 89
   }
 ];
 
@@ -81,11 +51,10 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
   const [generatingReport, setGeneratingReport] = useState<string | null>(null);
   const [viewingReport, setViewingReport] = useState<string | null>(null);
 
-  const filteredReports = mockReports.filter(report => {
+  const filteredReports = mockPatientWiseReports.filter(report => {
     const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGroup = selectedGroup === "all" || report.type === selectedGroup;
-    return matchesSearch && matchesGroup;
+    return matchesSearch;
   });
 
   const handleGenerateReport = async (reportId: string, format: "excel" | "pdf") => {
@@ -103,30 +72,60 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
   };
 
   const getReportDetails = (reportId: string) => {
-    const report = mockReports.find(r => r.id === reportId);
+    const report = mockPatientWiseReports.find(r => r.id === reportId);
     if (!report) return null;
 
-    // Mock detailed data for the report
-    const mockDetailedData = {
+    // Mock detailed patient data for the report
+    const mockPatientData = {
       summary: {
-        totalPatients: report.records,
-        pendingFollowups: report.pendingCount,
-        overdueItems: report.status === "overdue" ? report.pendingCount : Math.floor(report.pendingCount * 0.15),
-        avgResponseTime: "3.2 days"
+        totalPatients: report.totalPatients,
+        totalServices: 245,
+        totalRevenue: "$156,780",
+        avgServicesPerPatient: "2.8"
       },
-      recentEntries: [
-        { patient: "John Smith", provider: "Dr. Johnson", status: "Pending", daysOld: 5, amount: "$1,250" },
-        { patient: "Sarah Wilson", provider: "Dr. Martinez", status: "Overdue", daysOld: 12, amount: "$890" },
-        { patient: "Mike Davis", provider: "Dr. Thompson", status: "Pending", daysOld: 3, amount: "$2,100" },
-        { patient: "Lisa Brown", provider: "Dr. Anderson", status: "Pending", daysOld: 7, amount: "$1,450" }
+      patientDetails: [
+        { 
+          patient: "John Smith", 
+          patientId: "P001",
+          dateOfBirth: "1985-03-15",
+          phone: "(555) 123-4567",
+          services: [
+            { service: "Consultation", date: "2024-01-10", provider: "Dr. Johnson", amount: "$200", status: "Completed" },
+            { service: "X-Ray", date: "2024-01-10", provider: "Dr. Johnson", amount: "$150", status: "Completed" },
+            { service: "Follow-up", date: "2024-01-20", provider: "Dr. Johnson", amount: "$100", status: "Scheduled" }
+          ],
+          totalAmount: "$450"
+        },
+        { 
+          patient: "Sarah Wilson", 
+          patientId: "P002",
+          dateOfBirth: "1992-07-22",
+          phone: "(555) 987-6543",
+          services: [
+            { service: "Physical Therapy", date: "2024-01-08", provider: "Dr. Martinez", amount: "$120", status: "Completed" },
+            { service: "MRI Scan", date: "2024-01-12", provider: "Dr. Martinez", amount: "$800", status: "Completed" }
+          ],
+          totalAmount: "$920"
+        },
+        { 
+          patient: "Mike Davis", 
+          patientId: "P003",
+          dateOfBirth: "1978-11-05",
+          phone: "(555) 456-7890",
+          services: [
+            { service: "Surgery", date: "2024-01-05", provider: "Dr. Thompson", amount: "$2,500", status: "Completed" },
+            { service: "Post-op Care", date: "2024-01-15", provider: "Dr. Thompson", amount: "$300", status: "In Progress" }
+          ],
+          totalAmount: "$2,800"
+        }
       ]
     };
 
-    return { report, details: mockDetailedData };
+    return { report, details: mockPatientData };
   };
 
   return (
-    <Layout title="Provider Follow-up Reports" onNavigate={onNavigate}>
+    <Layout title="Patient Reports" onNavigate={onNavigate}>
       <div className="space-y-6">
         {/* Header with Back Button */}
         <div className="flex items-center gap-4">
@@ -140,9 +139,9 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
             Back to Dashboard
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground">Provider Follow-up Reports</h1>
+            <h1 className="text-2xl font-bold text-foreground">Patient Reports</h1>
             <p className="text-sm text-muted-foreground">
-              View and download provider pending follow-up reports organized by patients and status
+              Comprehensive patient details and all services data from the system
             </p>
           </div>
         </div>
@@ -168,19 +167,6 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="group">Report Type</Label>
-                  <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select report type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Reports</SelectItem>
-                      <SelectItem value="patient-wise">Patient Wise</SelectItem>
-                      <SelectItem value="status-wise">Status Wise</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
                 <div>
                   <Label>Date Range</Label>
@@ -238,7 +224,6 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                   className="w-full"
                   onClick={() => {
                     setSearchTerm("");
-                    setSelectedGroup("all");
                     setDateFrom(undefined);
                     setDateTo(undefined);
                   }}
@@ -254,7 +239,7 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-foreground">
-                  Available Reports ({filteredReports.length})
+                  Patient Reports ({filteredReports.length})
                 </h2>
               </div>
 
@@ -284,10 +269,10 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                        </CardHeader>
                        <CardContent>
                          <div className="flex justify-between items-center">
-                           <div className="text-sm text-muted-foreground">
-                             <p>Last Generated: {format(new Date(report.lastGenerated), "PPP")}</p>
-                             <p>{report.records} total records • {report.pendingCount} pending</p>
-                           </div>
+                            <div className="text-sm text-muted-foreground">
+                              <p>Last Generated: {format(new Date(report.lastGenerated), "PPP")}</p>
+                              <p>{report.totalPatients} total patients with comprehensive service data</p>
+                            </div>
                            
                            <div className="flex gap-2">
                              <Button
@@ -326,49 +311,63 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                          {isViewing && reportDetails && (
                            <div className="mt-4 pt-4 border-t border-border">
                              <div className="space-y-4">
-                               {/* Summary Stats */}
-                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                 <div className="bg-accent/30 rounded-lg p-3">
-                                   <div className="text-2xl font-bold text-primary">{reportDetails.details.summary.totalPatients}</div>
-                                   <div className="text-xs text-muted-foreground">Total Patients</div>
-                                 </div>
-                                 <div className="bg-accent/30 rounded-lg p-3">
-                                   <div className="text-2xl font-bold text-orange-600">{reportDetails.details.summary.pendingFollowups}</div>
-                                   <div className="text-xs text-muted-foreground">Pending Follow-ups</div>
-                                 </div>
-                                 <div className="bg-accent/30 rounded-lg p-3">
-                                   <div className="text-2xl font-bold text-destructive">{reportDetails.details.summary.overdueItems}</div>
-                                   <div className="text-xs text-muted-foreground">Overdue Items</div>
-                                 </div>
-                                 <div className="bg-accent/30 rounded-lg p-3">
-                                   <div className="text-2xl font-bold text-primary">{reportDetails.details.summary.avgResponseTime}</div>
-                                   <div className="text-xs text-muted-foreground">Avg Response</div>
-                                 </div>
-                               </div>
+                                {/* Summary Stats */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                  <div className="bg-accent/30 rounded-lg p-3">
+                                    <div className="text-2xl font-bold text-primary">{reportDetails.details.summary.totalPatients}</div>
+                                    <div className="text-xs text-muted-foreground">Total Patients</div>
+                                  </div>
+                                  <div className="bg-accent/30 rounded-lg p-3">
+                                    <div className="text-2xl font-bold text-green-600">{reportDetails.details.summary.totalServices}</div>
+                                    <div className="text-xs text-muted-foreground">Total Services</div>
+                                  </div>
+                                  <div className="bg-accent/30 rounded-lg p-3">
+                                    <div className="text-2xl font-bold text-blue-600">{reportDetails.details.summary.totalRevenue}</div>
+                                    <div className="text-xs text-muted-foreground">Total Revenue</div>
+                                  </div>
+                                  <div className="bg-accent/30 rounded-lg p-3">
+                                    <div className="text-2xl font-bold text-purple-600">{reportDetails.details.summary.avgServicesPerPatient}</div>
+                                    <div className="text-xs text-muted-foreground">Avg Services/Patient</div>
+                                  </div>
+                                </div>
                                
-                               {/* Recent Entries */}
-                               <div>
-                                 <h4 className="font-semibold text-foreground mb-3">Recent Entries Preview</h4>
-                                 <div className="space-y-2">
-                                   {reportDetails.details.recentEntries.map((entry, index) => (
-                                     <div key={index} className="flex justify-between items-center p-3 bg-background rounded-lg border border-border">
-                                       <div className="flex-1">
-                                         <div className="font-medium text-foreground">{entry.patient}</div>
-                                         <div className="text-sm text-muted-foreground">{entry.provider}</div>
-                                       </div>
-                                       <div className="text-center">
-                                         <Badge variant={entry.status === "Overdue" ? "destructive" : "outline"}>
-                                           {entry.status}
-                                         </Badge>
-                                         <div className="text-xs text-muted-foreground mt-1">{entry.daysOld} days</div>
-                                       </div>
-                                       <div className="text-right">
-                                         <div className="font-medium text-foreground">{entry.amount}</div>
-                                       </div>
-                                     </div>
-                                   ))}
-                                 </div>
-                               </div>
+                                {/* Patient Details */}
+                                <div>
+                                  <h4 className="font-semibold text-foreground mb-3">Patient Details Preview</h4>
+                                  <div className="space-y-4">
+                                    {reportDetails.details.patientDetails.map((patient, index) => (
+                                      <div key={index} className="p-4 bg-background rounded-lg border border-border">
+                                        <div className="flex justify-between items-start mb-3">
+                                          <div className="flex-1">
+                                            <div className="font-medium text-foreground">{patient.patient}</div>
+                                            <div className="text-sm text-muted-foreground">ID: {patient.patientId} • DOB: {patient.dateOfBirth} • Phone: {patient.phone}</div>
+                                          </div>
+                                          <div className="text-right">
+                                            <div className="font-medium text-primary">{patient.totalAmount}</div>
+                                            <div className="text-xs text-muted-foreground">Total Amount</div>
+                                          </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                          <h5 className="text-sm font-medium text-foreground">Services:</h5>
+                                          {patient.services.map((service, serviceIndex) => (
+                                            <div key={serviceIndex} className="flex justify-between items-center text-sm p-2 bg-accent/20 rounded">
+                                              <div>
+                                                <span className="font-medium">{service.service}</span>
+                                                <span className="text-muted-foreground ml-2">• {service.date} • {service.provider}</span>
+                                              </div>
+                                              <div className="flex items-center gap-2">
+                                                <Badge variant={service.status === "Completed" ? "default" : service.status === "In Progress" ? "secondary" : "outline"}>
+                                                  {service.status}
+                                                </Badge>
+                                                <span className="font-medium">{service.amount}</span>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                              </div>
                            </div>
                          )}
