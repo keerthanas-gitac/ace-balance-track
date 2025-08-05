@@ -44,37 +44,45 @@ const getPatientData = (patientId: string) => {
           id: "A001",
           serviceProvider: "Texas Ortho Spine Center (Dr. Bashir)",
           treatmentDetails: "Lumbar Spine MRI with Contrast",
+          appointmentDate: "2024-01-15",
           currentBalance: 2190,
+          finalBalance: 1314,
           status: "Completed",
-          caseProgress: {
-            currentStep: 5,
-            stepCompletionStatus: { 1: true, 2: true, 3: true, 4: true, 5: true },
-            totalBillValue: 2190
-          }
+          reductionPercentage: "40.0%",
+          caseProgress: "100% Complete"
         },
         {
-          id: "A002",
-          serviceProvider: "NuAdvance Orthopedics",
-          treatmentDetails: "Physical Therapy Sessions (10)",
-          currentBalance: 2190,
+          id: "A002", 
+          serviceProvider: "Texas Ortho Spine Center (Dr. Bashir)",
+          treatmentDetails: "Follow-up Consultation",
+          appointmentDate: "2024-01-22",
+          currentBalance: 300,
+          finalBalance: 180,
           status: "Completed",
-          caseProgress: {
-            currentStep: 5,
-            stepCompletionStatus: { 1: true, 2: true, 3: true, 4: true, 5: true },
-            totalBillValue: 2190
-          }
+          reductionPercentage: "40.0%",
+          caseProgress: "100% Complete"
         },
         {
           id: "A003",
+          serviceProvider: "NuAdvance Orthopedics", 
+          treatmentDetails: "Physical Therapy Sessions (10)",
+          appointmentDate: "2024-01-25",
+          currentBalance: 2190,
+          finalBalance: 1314,
+          status: "Completed",
+          reductionPercentage: "40.0%",
+          caseProgress: "100% Complete"
+        },
+        {
+          id: "A004",
           serviceProvider: "Metro Pain Management",
           treatmentDetails: "Epidural Steroid Injection",
+          appointmentDate: "2024-02-01",
           currentBalance: 850,
-          status: "Completed",
-          caseProgress: {
-            currentStep: 5,
-            stepCompletionStatus: { 1: true, 2: true, 3: true, 4: true, 5: true },
-            totalBillValue: 850
-          }
+          finalBalance: 510,
+          status: "Completed", 
+          reductionPercentage: "40.0%",
+          caseProgress: "100% Complete"
         }
       ]
     },
@@ -88,34 +96,32 @@ const getPatientData = (patientId: string) => {
       accountBalance: "$1,800",
       appointments: [
         {
-          id: "A004",
+          id: "A005",
           serviceProvider: "Regional Medical Center",
           treatmentDetails: "Knee Arthroscopy",
+          appointmentDate: "2024-01-10",
           currentBalance: 3500,
+          finalBalance: 2450,
           status: "In Progress",
-          caseProgress: {
-            currentStep: 3,
-            stepCompletionStatus: { 1: true, 2: true, 3: true, 4: false, 5: false },
-            totalBillValue: 3500
-          }
+          reductionPercentage: "30.0%",
+          caseProgress: "60% Complete"
         },
         {
-          id: "A005",
+          id: "A006",
           serviceProvider: "Physical Therapy Associates",
           treatmentDetails: "Post-Surgery Rehabilitation",
+          appointmentDate: "2024-01-20",
           currentBalance: 1200,
+          finalBalance: 1080,
           status: "Scheduled",
-          caseProgress: {
-            currentStep: 1,
-            stepCompletionStatus: { 1: false, 2: false, 3: false, 4: false, 5: false },
-            totalBillValue: 1200
-          }
+          reductionPercentage: "10.0%",
+          caseProgress: "20% Complete"
         }
       ]
     },
     "P003": {
       patient: "Mike Davis",
-      patientId: "P003",
+      patientId: "P003", 
       dateOfBirth: "1978-11-05",
       phone: "(555) 456-7890",
       email: "mike.davis@email.com",
@@ -123,16 +129,26 @@ const getPatientData = (patientId: string) => {
       accountBalance: "$5,200",
       appointments: [
         {
-          id: "A006",
+          id: "A007",
           serviceProvider: "Heart Surgery Center",
           treatmentDetails: "Cardiac Catheterization",
+          appointmentDate: "2024-01-05",
           currentBalance: 8500,
+          finalBalance: 5100,
           status: "Completed",
-          caseProgress: {
-            currentStep: 5,
-            stepCompletionStatus: { 1: true, 2: true, 3: true, 4: true, 5: true },
-            totalBillValue: 8500
-          }
+          reductionPercentage: "40.0%",
+          caseProgress: "100% Complete"
+        },
+        {
+          id: "A008",
+          serviceProvider: "Heart Surgery Center", 
+          treatmentDetails: "Post-Surgery Follow-up",
+          appointmentDate: "2024-01-12",
+          currentBalance: 500,
+          finalBalance: 300,
+          status: "Completed",
+          reductionPercentage: "40.0%",
+          caseProgress: "100% Complete"
         }
       ]
     }
@@ -141,17 +157,16 @@ const getPatientData = (patientId: string) => {
   return patientDetails[patientId as keyof typeof patientDetails] || null;
 };
 
-// Helper functions for calculations
-const getProgressPercentage = (progress: any) => {
-  const completedSteps = Object.values(progress.stepCompletionStatus).filter(Boolean).length;
-  const totalSteps = Object.keys(progress.stepCompletionStatus).length;
-  return Math.round((completedSteps / totalSteps) * 100);
-};
-
-const calculateFinalBalance = (originalBalance: number, progress: any) => {
-  const percentage = getProgressPercentage(progress);
-  const reductionRate = percentage === 100 ? 0.4 : percentage >= 60 ? 0.3 : percentage >= 40 ? 0.2 : 0.1;
-  return originalBalance * (1 - reductionRate);
+// Group appointments by provider
+const groupAppointmentsByProvider = (appointments: any[]) => {
+  const grouped: { [key: string]: any[] } = {};
+  appointments.forEach(appointment => {
+    if (!grouped[appointment.serviceProvider]) {
+      grouped[appointment.serviceProvider] = [];
+    }
+    grouped[appointment.serviceProvider].push(appointment);
+  });
+  return grouped;
 };
 
 export const Reports = ({ onNavigate }: ReportsProps) => {
@@ -314,82 +329,125 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                   </div>
                 </div>
 
-                {/* Detailed Service Information */}
+                {/* Provider-wise Appointment History */}
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">Service Details</h3>
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-muted/50">
-                          <TableHead className="font-semibold">Service Provider Name</TableHead>
-                          <TableHead className="font-semibold">Treatment Details</TableHead>
-                          <TableHead className="font-semibold">Current Balance</TableHead>
-                          <TableHead className="font-semibold">Final Balance</TableHead>
-                          <TableHead className="font-semibold">Status</TableHead>
-                          <TableHead className="font-semibold">Case Progress</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {patientData.appointments.map((appointment: any, index: number) => {
-                          const progressPercentage = getProgressPercentage(appointment.caseProgress);
-                          const finalBalance = calculateFinalBalance(appointment.currentBalance, appointment.caseProgress);
-                          const reductionRate = progressPercentage === 100 ? 40 : progressPercentage >= 60 ? 30 : progressPercentage >= 40 ? 20 : 10;
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Provider-wise Appointment History & Case Status</h3>
+                  <div className="border border-border bg-background">
+                    {/* Excel-style header */}
+                    <div className="grid grid-cols-7 border-b border-border bg-muted/30">
+                      <div className="p-3 border-r border-border font-semibold text-sm">Service Provider Name</div>
+                      <div className="p-3 border-r border-border font-semibold text-sm">Treatment Details</div>
+                      <div className="p-3 border-r border-border font-semibold text-sm">Appointment Date</div>
+                      <div className="p-3 border-r border-border font-semibold text-sm">Current Balance</div>
+                      <div className="p-3 border-r border-border font-semibold text-sm">Final Balance</div>
+                      <div className="p-3 border-r border-border font-semibold text-sm">Status</div>
+                      <div className="p-3 font-semibold text-sm">Case Progress</div>
+                    </div>
+                    
+                    {/* Group by provider and display */}
+                    {(() => {
+                      const groupedAppointments = groupAppointmentsByProvider(patientData.appointments);
+                      return Object.entries(groupedAppointments).map(([provider, appointments], providerIndex) => (
+                        <div key={provider}>
+                          {/* Provider header row */}
+                          <div className="grid grid-cols-7 bg-primary/5 border-b border-border">
+                            <div className="p-3 border-r border-border font-bold text-primary col-span-7">
+                              {provider} ({appointments.length} appointment{appointments.length > 1 ? 's' : ''})
+                            </div>
+                          </div>
                           
-                          return (
-                            <TableRow key={appointment.id} className="border-b">
-                              <TableCell className="font-medium">
+                          {/* Appointments for this provider */}
+                          {appointments.map((appointment: any, index: number) => (
+                            <div key={appointment.id} className="grid grid-cols-7 border-b border-border hover:bg-muted/20">
+                              <div className="p-3 border-r border-border text-sm">
                                 {appointment.serviceProvider}
-                              </TableCell>
-                              <TableCell>
+                              </div>
+                              <div className="p-3 border-r border-border text-sm">
                                 {appointment.treatmentDetails}
-                              </TableCell>
-                              <TableCell className="font-medium">
+                              </div>
+                              <div className="p-3 border-r border-border text-sm">
+                                {appointment.appointmentDate}
+                              </div>
+                              <div className="p-3 border-r border-border text-sm font-medium">
                                 ${appointment.currentBalance.toLocaleString()}
-                              </TableCell>
-                              <TableCell>
-                                <div className="space-y-1">
-                                  <div className="font-medium text-blue-600">
-                                    ${finalBalance.toLocaleString()}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {reductionRate}% reduction
-                                  </div>
+                              </div>
+                              <div className="p-3 border-r border-border text-sm">
+                                <div className="font-medium text-blue-600">
+                                  ${appointment.finalBalance.toLocaleString()}
                                 </div>
-                              </TableCell>
-                              <TableCell>
+                                <div className="text-xs text-muted-foreground">
+                                  {appointment.reductionPercentage} reduction
+                                </div>
+                              </div>
+                              <div className="p-3 border-r border-border text-sm">
                                 <Badge 
                                   variant={
                                     appointment.status === "Completed" ? "default" : 
                                     appointment.status === "In Progress" ? "secondary" : "outline"
                                   }
+                                  className="text-xs"
                                 >
                                   {appointment.status}
                                 </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <BarChart3 className="h-4 w-4 text-blue-600" />
-                                    <span className="text-sm font-medium">
-                                      {appointment.status}
-                                    </span>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Progress 
-                                      value={progressPercentage} 
-                                      className="h-2 bg-muted"
-                                    />
-                                    <div className="text-xs text-muted-foreground">
-                                      {progressPercentage}% Complete
-                                    </div>
-                                  </div>
+                              </div>
+                              <div className="p-3 text-sm">
+                                <div className="font-medium text-blue-600">
+                                  {appointment.caseProgress}
                                 </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {/* Provider summary row */}
+                          <div className="grid grid-cols-7 bg-accent/30 border-b-2 border-border">
+                            <div className="p-3 border-r border-border text-sm font-semibold col-span-3">
+                              {provider} - Total Summary
+                            </div>
+                            <div className="p-3 border-r border-border text-sm font-bold">
+                              ${appointments.reduce((sum: number, app: any) => sum + app.currentBalance, 0).toLocaleString()}
+                            </div>
+                            <div className="p-3 border-r border-border text-sm font-bold text-blue-600">
+                              ${appointments.reduce((sum: number, app: any) => sum + app.finalBalance, 0).toLocaleString()}
+                            </div>
+                            <div className="p-3 border-r border-border text-sm">
+                              <div className="text-xs">
+                                {appointments.filter((app: any) => app.status === "Completed").length} Completed, {" "}
+                                {appointments.filter((app: any) => app.status === "In Progress").length} In Progress, {" "}
+                                {appointments.filter((app: any) => app.status === "Scheduled").length} Scheduled
+                              </div>
+                            </div>
+                            <div className="p-3 text-sm">
+                              <div className="text-xs font-medium">
+                                Overall Progress
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                    
+                    {/* Grand Total Row */}
+                    <div className="grid grid-cols-7 bg-primary/10 border-t-2 border-primary">
+                      <div className="p-4 border-r border-border font-bold text-primary col-span-3">
+                        GRAND TOTAL - All Providers
+                      </div>
+                      <div className="p-4 border-r border-border font-bold text-lg">
+                        ${patientData.appointments.reduce((sum: number, app: any) => sum + app.currentBalance, 0).toLocaleString()}
+                      </div>
+                      <div className="p-4 border-r border-border font-bold text-lg text-blue-600">
+                        ${patientData.appointments.reduce((sum: number, app: any) => sum + app.finalBalance, 0).toLocaleString()}
+                      </div>
+                      <div className="p-4 border-r border-border">
+                        <div className="text-sm font-medium">
+                          Total: {patientData.appointments.length} appointments
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="text-sm font-medium">
+                          Account Balance: {patientData.accountBalance}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
