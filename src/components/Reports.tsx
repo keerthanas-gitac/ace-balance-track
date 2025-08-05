@@ -51,11 +51,28 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
   const [generatingReport, setGeneratingReport] = useState<string | null>(null);
   const [viewingReport, setViewingReport] = useState<string | null>(null);
 
-  const filteredReports = mockPatientWiseReports.filter(report => {
-    const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  const getFilteredPatientData = () => {
+    const reportData = getReportDetails("1");
+    if (!reportData) return [];
+    
+    if (!searchTerm) return reportData.details.patientDetails;
+    
+    return reportData.details.patientDetails.filter(patient => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        patient.patient.toLowerCase().includes(searchLower) ||
+        patient.patientId.toLowerCase().includes(searchLower) ||
+        patient.phone.includes(searchTerm) ||
+        patient.services.some(service => 
+          service.service.toLowerCase().includes(searchLower) ||
+          service.provider.toLowerCase().includes(searchLower) ||
+          service.status.toLowerCase().includes(searchLower)
+        )
+      );
+    });
+  };
+
+  const filteredReports = mockPatientWiseReports;
 
   const handleGenerateReport = async (reportId: string, format: "excel" | "pdf") => {
     setGeneratingReport(reportId);
@@ -157,10 +174,10 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="search">Search Reports</Label>
+                  <Label htmlFor="search">Search Patients</Label>
                   <Input
                     id="search"
-                    placeholder="Search by name or description..."
+                    placeholder="Search by patient name, ID, phone, service, or provider..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="mt-1"
@@ -333,9 +350,11 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                                
                                 {/* Patient Details */}
                                 <div>
-                                  <h4 className="font-semibold text-foreground mb-3">Patient Details Preview</h4>
+                                  <h4 className="font-semibold text-foreground mb-3">
+                                    Patient Details {searchTerm && `(Filtered: ${getFilteredPatientData().length} of ${reportDetails.details.patientDetails.length})`}
+                                  </h4>
                                   <div className="space-y-4">
-                                    {reportDetails.details.patientDetails.map((patient, index) => (
+                                    {getFilteredPatientData().map((patient, index) => (
                                       <div key={index} className="p-4 bg-background rounded-lg border border-border">
                                         <div className="flex justify-between items-start mb-3">
                                           <div className="flex-1">
@@ -366,6 +385,11 @@ export const Reports = ({ onNavigate }: ReportsProps) => {
                                         </div>
                                       </div>
                                     ))}
+                                    {getFilteredPatientData().length === 0 && searchTerm && (
+                                      <div className="text-center py-8">
+                                        <p className="text-muted-foreground">No patients found matching "{searchTerm}"</p>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                              </div>
